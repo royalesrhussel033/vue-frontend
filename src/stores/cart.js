@@ -1,8 +1,6 @@
 import { defineStore } from 'pinia'
-import axios from 'axios'
+import { api } from '@/lib/api'
 import { useToast } from 'vue-toastification'
-
-axios.defaults.baseURL = 'http://127.0.0.1:8000/api'
 
 const toast = useToast()
 
@@ -13,7 +11,7 @@ export const useCartStore = defineStore('cart', {
     actions: {
         async addToCart(product, qty = 1, size_id = null, size_name = null) {
             try {
-                await axios.post('/User/addtocart', {
+                await api.post('/User/addtocart', {
                     product_id: product.id,
                     quantity: qty,
                     size_id,
@@ -38,7 +36,7 @@ export const useCartStore = defineStore('cart', {
         
         async fetchCartItem() {
             try {
-                const response = await axios.get('/User/getCartItems')
+                const response = await api.get('/User/getCartItems')
                 this.items = response.data
             } catch (error) {
                 console.error('Error fetching Cart Items:', error)
@@ -47,7 +45,7 @@ export const useCartStore = defineStore('cart', {
 
         async removeCartItem(id) {
                 try {
-                    await axios.delete('/User/removeCartItems/' + id);
+                    await api.delete('/User/removeCartItems/' + id);
                     this.items = this.items.filter(item => item.id !== id)
                 } catch (error) {
                     console.error('Failed to remove cart item: ', error)

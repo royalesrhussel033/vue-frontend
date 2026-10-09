@@ -1,11 +1,7 @@
 import { defineStore } from 'pinia'
-import axios from 'axios'
+import { api } from '@/lib/api'
 import router from '@/router'
 import FeaturedProduct from '@/components/featuredProduct.vue'
-
-
-axios.defaults.baseURL = 'http://127.0.0.1:8000/api'
-
 
 export const useProductStore = defineStore('products', {
     state: () => ({
@@ -23,7 +19,7 @@ export const useProductStore = defineStore('products', {
             this.errors = []
             this.loading = true
             try {
-                const response = await axios.post('/Admin/updateproduct/' + id, formData)
+                const response = await api.post('/Admin/updateproduct/' + id, formData)
                 
                 await this.fetchProducts()
                 
@@ -43,7 +39,7 @@ export const useProductStore = defineStore('products', {
             this.errors = []
             this.loading = true
             try {
-                const response = await axios.post('/Admin/addcategories', formData) 
+                const response = await api.post('/Admin/addcategories', formData) 
                 this.newCategory = "";
                 await this.fetchCategories();
                 return response.data
@@ -62,7 +58,7 @@ export const useProductStore = defineStore('products', {
             this.errors = []
             this.loading = true
             try {
-                const response = await axios.post('/Admin/addproduct', formData, {
+                const response = await api.post('/Admin/addproduct', formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 })
                 await this.fetchProducts();
@@ -80,7 +76,7 @@ export const useProductStore = defineStore('products', {
 
         async fetchCategories() {
             try {
-                const response = await axios.get('/Admin/showcategories')
+                const response = await api.get('/Admin/showcategories')
                 this.categories = response.data;
             } catch (error) {
                 console.error("Error fetching categories:", error)
@@ -90,7 +86,7 @@ export const useProductStore = defineStore('products', {
         // fetch products to admin
         async fetchProducts() {
             try {
-                const response = await axios.get('/Admin/showproducts')
+                const response = await api.get('/Admin/showproducts')
                 this.products = response.data;
             } catch (error) {
                 console.error("Error fetching products:", error)
@@ -98,7 +94,7 @@ export const useProductStore = defineStore('products', {
         },
 
         async destroyProduct(id) {
-            await axios.delete('/Admin/deleteproduct/' + id);
+            await api.delete('/Admin/deleteproduct/' + id);
 
             // Update list
             
@@ -106,7 +102,7 @@ export const useProductStore = defineStore('products', {
         },
 
         async destroyCategory(id) {
-            await axios.delete('/Admin/deletecategory/' + id);
+            await api.delete('/Admin/deletecategory/' + id);
 
             // Update list
 
@@ -115,7 +111,7 @@ export const useProductStore = defineStore('products', {
 
         async fetchUserProducts() {
             try {
-                const response = await axios.get('/Guest/getProducts')
+                const response = await api.get('/Guest/getProducts')
                 this.featuredProducts = response.data
             } catch (error) {
                 console.error('Error fetching featured Products', error)
@@ -124,7 +120,7 @@ export const useProductStore = defineStore('products', {
 
         async fetchShopProducts() {
             try {
-                const response = await axios.get('/Guest/getShopProducts')
+                const response = await api.get('/Guest/getShopProducts')
                 this.products = response.data
             } catch (error) {
                 console.error('Error fetching Shop Products.')
@@ -133,7 +129,7 @@ export const useProductStore = defineStore('products', {
 
         async fetchUserCategories() {
             try {
-                const response = await axios.get('/Guest/getCategories')
+                const response = await api.get('/Guest/getCategories')
                 this.categories = response.data;
             } catch (error) {
                 console.error("Error fetching categories:", error)
@@ -142,7 +138,7 @@ export const useProductStore = defineStore('products', {
 
         async fetchBestSeller() {
             try {
-                const response = await axios.get('/Guest/getBestSeller')
+                const response = await api.get('/Guest/getBestSeller')
                 this.bestSellerProducts = response.data
             } catch (error) {
                 console.error("Error fetching Best sellers:", error)

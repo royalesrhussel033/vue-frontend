@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router';
 import { useProductStore } from '@/stores/products';
 import { storeToRefs } from 'pinia';
 import { useToast } from 'vue-toastification';
-import axios from 'axios';
+import { api } from '@/lib/api'
 
 const toast = useToast()
 const router = useRouter()
@@ -26,7 +26,7 @@ const selectedSizes = ref([])
 onMounted(async () => {
     productStore.fetchCategories()
 
-    const response = await axios.get('/Admin/getAdminSizes')
+    const response = await api.get('/Admin/getAdminSizes')
     sizesList.value = response.data
 })
 

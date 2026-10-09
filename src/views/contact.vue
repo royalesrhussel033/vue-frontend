@@ -1,9 +1,7 @@
 <script setup>
 import { ref } from 'vue';
-import axios from 'axios';
+import { api } from '@/lib/api'
 import Swal from 'sweetalert2'
-
-axios.defaults.baseURL = 'http://127.0.0.1:8000/api'
 
 const form = ref({
   name: '',
@@ -19,7 +17,7 @@ async function submitConcern() {
   loading.value = true
 
   try {
-    const response = await axios.post('/Guest/Concern', form.value)
+    const response = await api.post('/Guest/Concern', form.value)
     await Swal.fire({
       title: 'Sent',
       text: response.data.message || 'Your message has been sent successfully.',

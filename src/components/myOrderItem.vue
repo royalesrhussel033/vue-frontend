@@ -6,6 +6,7 @@ import { ref, onMounted } from 'vue';
 import ProductDetailsModal from './productDetailsModal.vue';
 import { useProductStore } from '@/stores/products';
 import Swal from 'sweetalert2'
+import { api } from '@/lib/api'
 
 const { item } = defineProps({
   item: {
@@ -40,8 +41,8 @@ async function confirmReceived() {
   isConfirming.value = true
 
   try {
-    const response = await fetch(
-      `http://127.0.0.1:8000/api/User/orders/${item.id}/confirm-received`, {
+    const response = await api.post(
+      `/User/orders/${item.id}/confirm-received`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -126,7 +127,7 @@ async function cancelOrder() {
   errorMessage.value = null;
 
   try {
-    const response = await fetch(`http://127.0.0.1:8000/api/User/orders/${item.id}/cancel`, {
+    const response = await api.post(`/User/orders/${item.id}/cancel`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

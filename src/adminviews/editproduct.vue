@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useProductStore } from '@/stores/products'
 import { useToast } from 'vue-toastification'
-import axios from 'axios'
+import { api } from '@/lib/api'
 
 const toast = useToast()
 const route = useRoute()
@@ -45,7 +45,7 @@ onMounted(async () => {
         selectedSizes.value = current.sizes?.map(size => size.id) || []
     }
 
-    const response = await axios.get('/Admin/getAdminSizes')
+    const response = await api.get('/Admin/getAdminSizes')
     sizesList.value = response.data
 })
 

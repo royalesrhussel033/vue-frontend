@@ -6,6 +6,7 @@ import RecentOrders from '@/components/recentOrders.vue';
 import RevenueChart from '@/components/revenueChart.vue';
 import LowStockAlerts from '@/components/lowStockAlerts.vue';
 import TopProducts from '@/components/topProducts.vue';
+import { api } from '@/lib/api'
 
 const dashboardData = ref({
   totalRevenue: 0,
@@ -28,11 +29,7 @@ async function fetchDashboardData() {
   isLoading.value = true;
   try {
     const token = localStorage.getItem('token');
-    const response = await fetch('http://127.0.0.1:8000/api/Admin/dashboard-stats', {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
+    const response = await api.get('/Admin/dashboard-stats');
     
     if (!response.ok) throw new Error('Failed to fetch dashboard data');
     

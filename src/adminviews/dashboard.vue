@@ -29,7 +29,7 @@ async function fetchDashboardData() {
   isLoading.value = true;
   try {
     const token = localStorage.getItem('token');
-    const response = await api.get('/Admin/dashboard-stats');
+    const response = await api.post('/Admin/dashboard-stats');
     
     if (!response.ok) throw new Error('Failed to fetch dashboard data');
     

@@ -29,7 +29,7 @@ async function fetchDashboardData() {
   isLoading.value = true;
   try {
     const response = await api.get('/Admin/dashboard-stats')
-    dashboardData.value = await response.json();
+    dashboardData.value = response.json();
   } catch (error) {
     console.error('Error fetching dashboard data:', error.response?.data || error.message)
   } finally {

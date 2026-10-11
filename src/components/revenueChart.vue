@@ -16,12 +16,8 @@ onMounted(async () => {
 async function fetchRevenueData() {
   isLoading.value = true;
   try {
-    const token = localStorage.getItem('token');
     const response = await api.get('/Admin/revenue-stats');
-
-    if (!response.ok) throw new Error('Failed to fetch revenue data');
-
-    const data = await response.json();
+    const data = response.data
     
     chartData.value = {
       labels: data.dates, // ['Jan', 'Feb', 'Mar', ...]
@@ -42,7 +38,7 @@ async function fetchRevenueData() {
       ]
     };
   } catch (error) {
-    console.error('Error fetching revenue data:', error);
+    console.error('Error fetching revenue data:', error.response?.data || error.message)
   } finally {
     isLoading.value = false;
   }

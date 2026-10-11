@@ -1,8 +1,9 @@
 <script setup>
-import { api } from '@/lib/api'
+import axios from 'axios';
 import { ref, onMounted } from 'vue';
 import adminSidebar from '@/components/adminSidebar.vue';
 
+axios.defaults.baseURL = 'http://127.0.0.1:8000/api'
 
 const contacts = ref([])
 const loading = ref(false)
@@ -35,7 +36,7 @@ async function getAdminContact() {
     loading.value = true
     errors.value = ''
     try {
-        const response = await api.get('/Admin/adminContact')
+        const response = await axios.get('/Admin/adminContact')
         contacts.value = response.data
     } catch (err) {
         errors.value = err.response?.data?.message || 'Failed to load contacts.'

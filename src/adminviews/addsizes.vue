@@ -2,7 +2,7 @@
 import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
-import { api } from '@/lib/api'
+import axios from 'axios'
 
 const toast = useToast()
 const router = useRouter()
@@ -13,7 +13,7 @@ const form = reactive({
 
 const submitForm = async () => {
   try {
-    await api.post('/Admin/storeAdminSizes', { name: form.name })
+    await axios.post('/Admin/storeAdminSizes', { name: form.name })
     toast.success('Size added successfully')
     router.back()
   } catch (error) {

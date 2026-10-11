@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia'
-import { api } from '@/lib/api'
+import axios from 'axios'
+
+axios.defaults.baseURL = 'http://127.0.0.1:8000/api'
 
 export const orderStore = defineStore('orders', {
     state: () => ({
@@ -10,7 +12,7 @@ export const orderStore = defineStore('orders', {
     actions: {
         async getOrders() {
             try {
-                const response = await api.get('/User/getOrders')
+                const response = await axios.get('/User/getOrders')
                 this.items = response.data
             } catch (error) {
                 console.error('Error fetching Orders:', error)
@@ -19,7 +21,7 @@ export const orderStore = defineStore('orders', {
 
         async getOrderHistory() {
             try {
-                const response = await api.get('User/getOrderHistory')
+                const response = await axios.get('User/getOrderHistory')
                 this.items = response.data 
             } catch (error) {
                 console.error('Error fetching Order History:', error)
@@ -29,7 +31,7 @@ export const orderStore = defineStore('orders', {
         async getOrder(id) {
             if (!id) return
             try {
-                const response = await api.get(`/User/getOrders/${id}`)
+                const response = await axios.get(`/User/getOrders/${id}`)
                 this.selectedOrder = response.data
             } catch (error) {
                 console.error('Error fetching Order Id:', error)
@@ -38,7 +40,7 @@ export const orderStore = defineStore('orders', {
 
         async getAdminOrders() {
             try {
-                const response = await api.get('/Admin/getOrders')
+                const response = await axios.get('/Admin/getOrders')
                 this.items = response.data
             } catch (error) {
                 console.error('Error fetching Orders:', error)
@@ -47,7 +49,7 @@ export const orderStore = defineStore('orders', {
         
         async updateOrderStatus(id, status) {
             try {
-                const response = await api.put(`/Admin/updateOrderStatus/${id}`, { status })
+                const response = await axios.put(`/Admin/updateOrderStatus/${id}`, { status })
                 return response.data
             } catch (error) {
                 console.error('Error updating order status:', error)
@@ -57,7 +59,7 @@ export const orderStore = defineStore('orders', {
 
         async fetchAdminSales() {
             try {
-                const response = await api.get('/Admin/getSales')
+                const response = await axios.get('/Admin/getSales')
                 this.sales = response.data
             } catch (error) {
                 console.error("Error fetching sales:", error)

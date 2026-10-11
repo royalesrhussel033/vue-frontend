@@ -28,14 +28,10 @@ onMounted(async () => {
 async function fetchDashboardData() {
   isLoading.value = true;
   try {
-    const token = localStorage.getItem('token');
-    const response = await api.post('/Admin/dashboard-stats');
-    
-    if (!response.ok) throw new Error('Failed to fetch dashboard data');
-    
+    const response = await api.get('/Admin/dashboard-stats')
     dashboardData.value = await response.json();
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error fetching dashboard data:', error.response?.data || error.message)
   } finally {
     isLoading.value = false;
   }

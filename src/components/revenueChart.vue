@@ -2,7 +2,6 @@
 import { ref, onMounted } from 'vue';
 import { Line } from 'vue-chartjs';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
-import { api } from '@/lib/api'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
@@ -16,9 +15,16 @@ onMounted(async () => {
 async function fetchRevenueData() {
   isLoading.value = true;
   try {
-    
-    const response = await api.get('/Admin/revenue-stats')
-    const data = response.data
+    const token = localStorage.getItem('token');
+    const response = await fetch('http://127.0.0.1:8000/api/Admin/revenue-stats', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) throw new Error('Failed to fetch revenue data');
+
+    const data = await response.json();
     
     chartData.value = {
       labels: data.dates, // ['Jan', 'Feb', 'Mar', ...]

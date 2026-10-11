@@ -1,7 +1,9 @@
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
-import { api } from '@/lib/api'
+import axios from 'axios'
 import { defineStore } from 'pinia'
+
+axios.defaults.baseURL = 'http://127.0.0.1:8000/api'
 
 
 export const useCheckoutStore = defineStore('checkout', {
@@ -19,7 +21,7 @@ export const useCheckoutStore = defineStore('checkout', {
             const auth = useAuthStore()
 
         try {
-            const response = await api.post('/User/order', payload, {
+            const response = await axios.post('/User/order', payload, {
                 headers: {
                     'Idempotency-Key': idempotencyKey,
                 },

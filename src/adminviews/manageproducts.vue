@@ -6,7 +6,7 @@ import { storeToRefs } from 'pinia';
 import adminSidebar from '@/components/adminSidebar.vue';
 import { Trash2, SquarePen, CirclePlus } from '@lucide/vue'
 import Swal from 'sweetalert2'
-import { api } from '@/lib/api'
+import axios from 'axios';
 
 // Pagination setup constants
 const perPage = ref(5)
@@ -132,7 +132,7 @@ const confirmDeleteSize = async (id) => {
 
   if (!result.isConfirmed) return
 
-  await api.delete(`/Admin/destroyAdminSizes/${id}`)
+  await axios.delete(`/Admin/destroyAdminSizes/${id}`)
   await fetchSizes()
 
   await Swal.fire({
@@ -151,7 +151,7 @@ const sizes = ref([])
 
 const fetchSizes = async () => {
   try {
-    const response = await api.get('/Admin/getAdminSizes')
+    const response = await axios.get('/Admin/getAdminSizes')
     sizes.value = response.data
   } catch (error) {
     console.error('Failed to load sizes', error)

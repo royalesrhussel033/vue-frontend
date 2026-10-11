@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia'
-import { api } from '@/lib/api'
+import axios from 'axios'
 import { useToast } from 'vue-toastification'
 import router from '@/router'
 
-
+axios.defaults.baseURL = 'http://127.0.0.1:8000/api'
 
     
 
@@ -22,7 +22,7 @@ export const useAuthStore = defineStore('auth', {
             this.errors = []
             this.loading = true
             try {
-                const response = await api.post('/Guest/register', formData)
+                const response = await axios.post('/Guest/register', formData)
                 this.user = response.data.user ?? null
                 return response.data
             } catch (error) {
@@ -40,11 +40,11 @@ export const useAuthStore = defineStore('auth', {
         this.errors = []
         this.loading = true
         try {
-            const response = await api.post('/Guest/login', credentials)
+            const response = await axios.post('/Guest/login', credentials)
             const token = response.data.token;
 
             localStorage.setItem('token', token)
-            api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
             this.user = response.data.user
 
@@ -69,9 +69,9 @@ export const useAuthStore = defineStore('auth', {
         this.loading = true
         const token = localStorage.getItem('token')
         if (token) {
-            api.defaults.headers.common['Authorization'] = `Bearer ${token}`
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
             try {
-                const response = await api.get('User/home')
+                const response = await axios.get('User/home')
                 this.user = response.data.user
             } catch {
                 this.user = null
@@ -87,16 +87,16 @@ export const useAuthStore = defineStore('auth', {
         try {
             const token = localStorage.getItem('token')
             if (token) {
-                api.defaults.headers.common['Authorization'] = `Bearer ${token}`
+                axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
             }
 
-            await api.post('/User/logout')
+            await axios.post('/User/logout')
 
             // clear local state after succeful logout
 
             this.user = null
             localStorage.removeItem('token')
-            delete api.defaults.headers.common['Authorization']
+            delete axios.defaults.headers.common['Authorization']
 
             // redirect to guest home
             router.push({ name: 'home'})
@@ -107,7 +107,7 @@ export const useAuthStore = defineStore('auth', {
     }
 })
 
-api.interceptors.request.use(config => {
+axios.interceptors.request.use(config => {
     const token = localStorage.getItem('token')
     if (token) {
         config.headers.Authorization = `Bearer ${token}`

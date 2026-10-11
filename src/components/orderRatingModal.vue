@@ -1,6 +1,6 @@
 <script setup>
 import { ref, watch, computed } from 'vue'
-import { api } from '@/lib/api'
+import axios from 'axios'
 import { orderStore } from '@/stores/orders'
 import { useToast } from 'vue-toastification'
 
@@ -43,7 +43,7 @@ async function submitRating() {
   errorMessage.value = ''
 
   try {
-    await api.post(`/User/products/${props.productId}/rating`, {
+    await axios.post(`http://127.0.0.1:8000/api/User/products/${props.productId}/rating`, {
       rating: rating.value,
       comment: comment.value
     })

@@ -1,82 +1,240 @@
 <script setup>
-    import { ref } from 'vue';
-    import { useAuthStore } from '@/stores/auth';
-    import { useToast } from 'vue-toastification'
-    
-    const toast = useToast()
-    
-    const email = ref('')
-    const password = ref('')
-    const auth = useAuthStore()
-    const props = defineProps({ modelValue: Boolean })
-    const emit = defineEmits(['update:modelValue', 'switch-to-register'])
+import { ref, watch } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import { useToast } from 'vue-toastification'
+import { API_URL } from '@/lib/api'
 
-    const handleLogin = async () => {
-        await auth.login({
-            email: email.value,
-            password: password.value
-        })
+const toast = useToast()
+const email = ref('')
+const password = ref('')
+const twoFactorCode = ref('')
+const mode = ref('login')
+const auth = useAuthStore()
+const googleAuthUrl = (() => {
+  const url = new URL(API_URL)
+  url.pathname = `${url.pathname.replace(/\/api\/?$/, '')}/auth/google/redirect`
+  return url.toString()
+})()
+defineProps({ modelValue: Boolean })
+const emit = defineEmits(['update:modelValue', 'switch-to-register'])
 
-        // if login succeeded and auth.user is set close modal
-        if (auth.user) {
-            toast.success('Logged in!')
-            emit('update:modelValue', false) // <-- close modal
-        } else {
-            console.log(auth.errors)
-        }
-    }
+watch(() => auth.twoFactorChallenge, (challenge) => {
+  if (challenge) mode.value = 'two-factor'
+})
+
+const handleLogin = async () => {
+  const result = await auth.login({
+    email: email.value,
+    password: password.value,
+  })
+
+  if (result?.two_factor_required) {
+    mode.value = 'two-factor'
+    toast.info(result.message)
+  } else if (result && auth.user) {
+    toast.success('Logged in!')
+    emit('update:modelValue', false)
+  }
+}
+
+const handleTwoFactor = async () => {
+  const result = await auth.verifyTwoFactor(twoFactorCode.value)
+  if (result && auth.user) {
+    toast.success('Logged in!')
+    emit('update:modelValue', false)
+  }
+}
+
+const resendTwoFactorCode = async () => {
+  const message = await auth.resendTwoFactorCode()
+  if (message) toast.info(message)
+}
+
+const resendVerification = async () => {
+  const message = await auth.resendVerification(email.value)
+  if (message) toast.info(message)
+}
+
+const requestPasswordReset = async () => {
+  const message = await auth.requestPasswordReset(email.value)
+  if (message) toast.info(message)
+}
 </script>
 
 <template>
-  <div v-if="modelValue" class="fixed inset-0 z-50 flex items-center justify-center px-4" @keydown.esc.prevent="$emit('update:modelValue', false)">
-
-    <!-- Backdrop -->
+  <div
+    v-if="modelValue"
+    class="fixed inset-0 z-50 flex items-center justify-center px-4"
+    @keydown.esc.prevent="$emit('update:modelValue', false)"
+  >
     <div class="absolute inset-0 bg-black/50" @click="$emit('update:modelValue', false)" aria-hidden="true"></div>
-    <!-- Card -->
-    <div class="relative z-50 w-full max-w-md bg-white/95 dark:bg-slate-900 rounded-2xl shadow-2xl ring-1 ring-slate-200 dark:ring-slate-800 overflow-hidden"
-                role="dialog"
-                arial-modal="true"
-                aria-labelledby="login-title"          
-    @click.stop>
-
-        <!-- Header -->  
-
-        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
-            <div>
-                <h3 id="login-title" class="text-lg font-semibold text-slate-900 dark:text-slate-100">Sign in to your account</h3>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Welcome back — enter your details to continue</p>
-            </div>
-            <button @click="$emit('update:modelValue', false)" class="hover:cursor-pointer">✕</button>
+    <div
+      class="relative z-50 w-full max-w-md overflow-hidden rounded-2xl bg-white/95 shadow-2xl ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="login-title"
+      @click.stop
+    >
+      <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-800">
+        <div>
+          <h3 id="login-title" class="text-lg font-semibold text-slate-900 dark:text-slate-100">
+            {{ mode === 'login' ? 'Sign in to your account' : mode === 'forgot' ? 'Reset your password' : 'Verify your sign-in' }}
+          </h3>
+          <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            {{ mode === 'login' ? 'Welcome back — enter your details to continue' : mode === 'forgot' ? 'We’ll email a reset link if an account matches.' : 'Enter the six-digit code sent to your verified email.' }}
+          </p>
         </div>
+        <button type="button" aria-label="Close" @click="$emit('update:modelValue', false)">✕</button>
+      </div>
 
-        <!-- Body -->
-        <div class="px-6 py-1">
-            <!-- Errors -->
-            <ul v-if="auth.errors.length" class="mb-4 space-y-1 text-sm text-red-600">
-                <li v-for="(err, i) in auth.errors" :key="i">{{ err }}</li>
-            </ul>
+      <ul v-if="auth.errors.length" class="space-y-1 px-8 pt-4 text-sm text-red-600" role="alert">
+        <li v-for="(error, index) in auth.errors" :key="index">{{ error }}</li>
+      </ul>
+
+      <form v-if="mode === 'login'" class="space-y-4 py-5" @submit.prevent="handleLogin">
+        <div class="px-8">
+          <label for="login-email" class="sr-only">Email address</label>
+          <input
+            id="login-email"
+            v-model.trim="email"
+            type="email"
+            autocomplete="email"
+            required
+            class="w-full rounded-lg border border-slate-200 bg-white px-4 py-4 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+            placeholder="Email address"
+          />
         </div>
+        <div class="px-8">
+          <label for="login-password" class="sr-only">Password</label>
+          <input
+            id="login-password"
+            v-model="password"
+            type="password"
+            autocomplete="current-password"
+            required
+            class="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+            placeholder="Password"
+          />
+        </div>
+        <div class="px-8">
+          <button
+            type="submit"
+            :disabled="auth.loading"
+            class="w-full cursor-pointer rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-md transition hover:from-blue-700 hover:to-indigo-700 disabled:opacity-60"
+          >
+            {{ auth.loading ? 'Signing in…' : 'Sign in' }}
+          </button>
+        </div>
+        <div class="px-8">
+          <a
+            :href="googleAuthUrl"
+            class="block w-full rounded-lg border border-slate-200 px-4 py-3 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+          >
+            Continue with Google
+          </a>
+        </div>
+      </form>
 
-        <!-- form here -->
-        
-        <form @submit.prevent="handleLogin" class="space-y-4">
-            <div>
-                <div class="relative px-8">
-                    <input v-model="email" type="text" id="email" class="w-full px-4 py-4 pr-12 text-sm text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition" placeholder="Please enter you Email"/>
-                </div>
-                <div class="relative px-8 py-4">
-                    <input v-model="password" type="password" id="password" class="w-full px-4 py-3 pr-12 text-sm text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition" placeholder="Please enter your Password"/>
-                </div>
-            </div>
-            <div class="px-8 pb-5">
-                <button type="submit"  class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-linear-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold rounded-lg shadow-md hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-4 focus:ring-blue-200 transition cursor-pointer">Login</button>
-            </div>
-        </form>
-        
-        <!-- Button to Register or Login again -->
-         <button @click="$emit('switch-to-register')" class="mb-5 px-29 text-sm text-blue-600 hover:underline cursor-pointer">
-            Don't have an account? Register
+      <form v-else-if="mode === 'forgot'" class="space-y-4 py-5" @submit.prevent="requestPasswordReset">
+        <div class="px-8">
+          <label for="reset-email" class="sr-only">Email address</label>
+          <input
+            id="reset-email"
+            v-model.trim="email"
+            type="email"
+            autocomplete="email"
+            required
+            class="w-full rounded-lg border border-slate-200 bg-white px-4 py-4 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Email address"
+          />
+        </div>
+        <div class="px-8">
+          <button
+            type="submit"
+            class="w-full rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-md"
+          >
+            Send reset link
+          </button>
+        </div>
+      </form>
+
+      <form v-if="mode === 'two-factor'" class="space-y-4 py-5" @submit.prevent="handleTwoFactor">
+        <div class="px-8">
+          <label for="two-factor-code" class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">Six-digit code</label>
+          <input
+            id="two-factor-code"
+            v-model="twoFactorCode"
+            type="text"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            pattern="[0-9]{6}"
+            maxlength="6"
+            required
+            class="w-full rounded-lg border border-slate-200 bg-white px-4 py-4 text-center text-lg tracking-[0.4em] text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="000000"
+          />
+        </div>
+        <div class="px-8">
+          <button
+            type="submit"
+            :disabled="auth.loading"
+            class="w-full rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-md disabled:opacity-60"
+          >
+            {{ auth.loading ? 'Verifying…' : 'Verify and sign in' }}
+          </button>
+        </div>
+      </form>
+
+      <div class="flex flex-wrap items-center justify-between gap-3 px-8 pb-6 text-sm">
+        <button
+          v-if="mode === 'login'"
+          type="button"
+          class="text-blue-600 hover:underline"
+          @click="mode = 'forgot'; auth.errors = []"
+        >
+          Forgot password?
         </button>
+        <button
+          v-if="mode === 'login'"
+          type="button"
+          class="text-blue-600 hover:underline"
+          @click="resendVerification"
+        >
+          Resend verification email
+        </button>
+        <button
+          v-if="mode === 'forgot'"
+          type="button"
+          class="text-blue-600 hover:underline"
+          @click="mode = 'login'; auth.errors = []"
+        >
+          Back to sign in
+        </button>
+        <button
+          v-if="mode === 'two-factor'"
+          type="button"
+          class="text-blue-600 hover:underline"
+          @click="resendTwoFactorCode"
+        >
+          Resend code
+        </button>
+        <button
+          v-if="mode === 'two-factor'"
+          type="button"
+          class="text-blue-600 hover:underline"
+          @click="mode = 'login'; twoFactorCode = ''; auth.twoFactorChallenge = null; auth.errors = []"
+        >
+          Back to sign in
+        </button>
+        <button
+          v-if="mode === 'login'"
+          type="button"
+          class="text-blue-600 hover:underline"
+          @click="$emit('switch-to-register')"
+        >
+          Create an account
+        </button>
+      </div>
     </div>
   </div>
 </template>

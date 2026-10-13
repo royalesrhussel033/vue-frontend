@@ -2,7 +2,6 @@
 import { ref, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from 'vue-toastification'
-import { API_URL } from '@/lib/api'
 
 const toast = useToast()
 const email = ref('')
@@ -10,11 +9,6 @@ const password = ref('')
 const twoFactorCode = ref('')
 const mode = ref('login')
 const auth = useAuthStore()
-const googleAuthUrl = (() => {
-  const url = new URL(API_URL)
-  url.pathname = `${url.pathname.replace(/\/api\/?$/, '')}/auth/google/redirect`
-  return url.toString()
-})()
 defineProps({ modelValue: Boolean })
 const emit = defineEmits(['update:modelValue', 'switch-to-register'])
 
@@ -124,14 +118,6 @@ const requestPasswordReset = async () => {
           >
             {{ auth.loading ? 'Signing in…' : 'Sign in' }}
           </button>
-        </div>
-        <div class="px-8">
-          <a
-            :href="googleAuthUrl"
-            class="block w-full rounded-lg border border-slate-200 px-4 py-3 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
-          >
-            Continue with Google
-          </a>
         </div>
       </form>
 

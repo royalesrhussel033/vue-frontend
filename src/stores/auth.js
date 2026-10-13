@@ -71,37 +71,6 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    async completeGoogleLogin(code) {
-      this.errors = []
-      this.loading = true
-
-      try {
-        const response = await api.post('/Guest/oauth/exchange', { code })
-
-        if (response.data.two_factor_required) {
-          this.user = null
-          this.twoFactorChallenge = response.data.challenge_token
-          this.isRegister = false
-          this.openLoginModal = true
-          await router.push({ name: 'home' })
-          return response.data
-        }
-
-        localStorage.setItem('token', response.data.token)
-        this.user = response.data.user
-        this.twoFactorChallenge = null
-        await router.push({ name: 'home' })
-        return response.data
-      } catch (error) {
-        this.errors = error.response?.data?.message
-          ? [error.response.data.message]
-          : ['Unable to complete Google sign-in. Please try again.']
-        return null
-      } finally {
-        this.loading = false
-      }
-    },
-
     async verifyTwoFactor(code) {
       this.errors = []
       this.loading = true

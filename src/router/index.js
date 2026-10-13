@@ -102,11 +102,6 @@ const routes = [
         component: () => import('../views/resetPassword.vue')
     },
     {
-        path: '/oauth-callback',
-        name: 'oauthCallback',
-        component: () => import('../views/oauthCallback.vue')
-    },
-    {
         path: '/Sales',
         name: 'Sales',
         component: () => import('../adminviews/adminSales.vue'),

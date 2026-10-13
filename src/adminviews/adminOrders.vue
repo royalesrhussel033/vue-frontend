@@ -159,18 +159,21 @@ const changeOrderStatus = async (orderId, status) => {
               <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Update Progress State:</span>
               <div class="flex flex-wrap gap-2">
                 <button 
+                  v-if="item.status === 'Pending'"
                   @click="changeOrderStatus(item.id, 'Processing')" 
                   class="px-3 py-1.5 bg-white text-xs text-gray-700 font-semibold rounded-lg border border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all cursor-pointer"
                 >
                   Mark Processing
                 </button>
                 <button 
+                  v-if="item.status === 'Processing'"
                   @click="changeOrderStatus(item.id, 'Shipped')" 
                   class="px-3 py-1.5 bg-white text-xs text-gray-700 font-semibold rounded-lg border border-gray-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition-all cursor-pointer"
                 >
                   Mark Shipped
                 </button>
                 <button 
+                  v-if="item.status === 'Shipped'"
                   @click="changeOrderStatus(item.id, 'Delivered')" 
                   class="px-3 py-1.5 bg-white text-xs text-gray-700 font-semibold rounded-lg border border-gray-200 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 transition-all cursor-pointer"
                 >

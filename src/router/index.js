@@ -86,6 +86,27 @@ const routes = [
         meta: { requiresAuth: true}
     },
     {
+        path: '/profile',
+        name: 'profile',
+        component: () => import('../views/profile.vue'),
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/email-verified',
+        name: 'emailVerified',
+        component: () => import('../views/emailVerified.vue')
+    },
+    {
+        path: '/reset-password',
+        name: 'resetPassword',
+        component: () => import('../views/resetPassword.vue')
+    },
+    {
+        path: '/oauth-callback',
+        name: 'oauthCallback',
+        component: () => import('../views/oauthCallback.vue')
+    },
+    {
         path: '/Sales',
         name: 'Sales',
         component: () => import('../adminviews/adminSales.vue'),

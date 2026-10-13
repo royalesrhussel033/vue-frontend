@@ -64,6 +64,7 @@
           <RouterLink :to="{ name: 'cart' }" class="hover:text-blue-600 transition">
             <ShoppingBasket />
           </RouterLink>
+          <RouterLink :to="{ name: 'profile' }" class="text-sm hover:text-blue-600 transition">Profile</RouterLink>
           <RouterLink :to="{ name: 'orderHistory'}" class="hover:text-blue-600 transition">
             <History />
           </RouterLink>

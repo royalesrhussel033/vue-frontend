@@ -35,6 +35,29 @@ async function handleSubmit() {
         })
         return
     }
+
+    const requiredProfileFields = [
+      'first_name',
+      'last_name',
+      'phone',
+      'address',
+      'city',
+      'state',
+      'zipcode',
+      'country',
+    ]
+    if (requiredProfileFields.some(field => !auth.user?.[field])) {
+        await Swal.fire({
+            title: 'Complete your profile',
+            text: 'Add your delivery details to your profile before placing an order.',
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonText: 'Go to profile',
+        }).then(result => {
+            if (result.isConfirmed) router.push({ name: 'profile' })
+        })
+        return
+    }
  
     const item = cart.items[0]
     const productId = item.product_id ?? item.product?.id

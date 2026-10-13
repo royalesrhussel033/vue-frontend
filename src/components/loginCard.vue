@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from 'vue-toastification'
 
@@ -9,11 +9,17 @@ const password = ref('')
 const twoFactorCode = ref('')
 const mode = ref('login')
 const auth = useAuthStore()
+const twoFactorRequired = computed(() => Boolean(auth.twoFactorChallenge))
+const twoFactorInput = ref(null)
 defineProps({ modelValue: Boolean })
 const emit = defineEmits(['update:modelValue', 'switch-to-register'])
 
-watch(() => auth.twoFactorChallenge, (challenge) => {
-  if (challenge) mode.value = 'two-factor'
+watch(() => auth.twoFactorChallenge, async (challenge) => {
+  if (challenge) {
+    mode.value = 'two-factor'
+    await nextTick()
+    twoFactorInput.value?.focus()
+  }
 })
 
 const handleLogin = async () => {
@@ -72,10 +78,10 @@ const requestPasswordReset = async () => {
       <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-800">
         <div>
           <h3 id="login-title" class="text-lg font-semibold text-slate-900 dark:text-slate-100">
-            {{ mode === 'login' ? 'Sign in to your account' : mode === 'forgot' ? 'Reset your password' : 'Verify your sign-in' }}
+            {{ twoFactorRequired ? 'Verify your sign-in' : mode === 'forgot' ? 'Reset your password' : 'Sign in to your account' }}
           </h3>
           <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            {{ mode === 'login' ? 'Welcome back — enter your details to continue' : mode === 'forgot' ? 'We’ll email a reset link if an account matches.' : 'Enter the six-digit code sent to your verified email.' }}
+            {{ twoFactorRequired ? 'Enter the six-digit code sent to your verified email.' : mode === 'forgot' ? 'We’ll email a reset link if an account matches.' : 'Welcome back — enter your details to continue' }}
           </p>
         </div>
         <button type="button" aria-label="Close" @click="$emit('update:modelValue', false)">✕</button>
@@ -85,7 +91,7 @@ const requestPasswordReset = async () => {
         <li v-for="(error, index) in auth.errors" :key="index">{{ error }}</li>
       </ul>
 
-      <form v-if="mode === 'login'" class="space-y-4 py-5" @submit.prevent="handleLogin">
+      <form v-if="mode === 'login' && !twoFactorRequired" class="space-y-4 py-5" @submit.prevent="handleLogin">
         <div class="px-8">
           <label for="login-email" class="sr-only">Email address</label>
           <input
@@ -121,7 +127,7 @@ const requestPasswordReset = async () => {
         </div>
       </form>
 
-      <form v-else-if="mode === 'forgot'" class="space-y-4 py-5" @submit.prevent="requestPasswordReset">
+      <form v-else-if="mode === 'forgot' && !twoFactorRequired" class="space-y-4 py-5" @submit.prevent="requestPasswordReset">
         <div class="px-8">
           <label for="reset-email" class="sr-only">Email address</label>
           <input
@@ -144,11 +150,12 @@ const requestPasswordReset = async () => {
         </div>
       </form>
 
-      <form v-if="mode === 'two-factor'" class="space-y-4 py-5" @submit.prevent="handleTwoFactor">
+      <form v-else-if="twoFactorRequired" class="space-y-4 py-5" @submit.prevent="handleTwoFactor">
         <div class="px-8">
           <label for="two-factor-code" class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">Six-digit code</label>
           <input
             id="two-factor-code"
+            ref="twoFactorInput"
             v-model="twoFactorCode"
             type="text"
             inputmode="numeric"
@@ -173,7 +180,7 @@ const requestPasswordReset = async () => {
 
       <div class="flex flex-wrap items-center justify-between gap-3 px-8 pb-6 text-sm">
         <button
-          v-if="mode === 'login'"
+          v-if="mode === 'login' && !twoFactorRequired"
           type="button"
           class="text-blue-600 hover:underline"
           @click="mode = 'forgot'; auth.errors = []"
@@ -181,7 +188,7 @@ const requestPasswordReset = async () => {
           Forgot password?
         </button>
         <button
-          v-if="mode === 'login'"
+          v-if="mode === 'login' && !twoFactorRequired"
           type="button"
           class="text-blue-600 hover:underline"
           @click="resendVerification"
@@ -189,7 +196,7 @@ const requestPasswordReset = async () => {
           Resend verification email
         </button>
         <button
-          v-if="mode === 'forgot'"
+          v-if="mode === 'forgot' && !twoFactorRequired"
           type="button"
           class="text-blue-600 hover:underline"
           @click="mode = 'login'; auth.errors = []"
@@ -197,7 +204,7 @@ const requestPasswordReset = async () => {
           Back to sign in
         </button>
         <button
-          v-if="mode === 'two-factor'"
+          v-if="twoFactorRequired"
           type="button"
           class="text-blue-600 hover:underline"
           @click="resendTwoFactorCode"
@@ -205,7 +212,7 @@ const requestPasswordReset = async () => {
           Resend code
         </button>
         <button
-          v-if="mode === 'two-factor'"
+          v-if="twoFactorRequired"
           type="button"
           class="text-blue-600 hover:underline"
           @click="mode = 'login'; twoFactorCode = ''; auth.twoFactorChallenge = null; auth.errors = []"
@@ -213,7 +220,7 @@ const requestPasswordReset = async () => {
           Back to sign in
         </button>
         <button
-          v-if="mode === 'login'"
+          v-if="mode === 'login' && !twoFactorRequired"
           type="button"
           class="text-blue-600 hover:underline"
           @click="$emit('switch-to-register')"

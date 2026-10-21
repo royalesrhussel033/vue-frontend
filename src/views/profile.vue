@@ -134,7 +134,6 @@ const saveProfile = async () => {
               v-model="twoFactorPassword"
               type="password"
               autocomplete="current-password"
-              required
               aria-label="Confirm your password to update two-factor authentication"
               placeholder="Confirm your password"
               class="profile-input sm:max-w-xs"

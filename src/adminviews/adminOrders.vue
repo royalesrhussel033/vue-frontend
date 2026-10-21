@@ -3,6 +3,7 @@ import adminSidebar from '@/components/adminSidebar.vue'
 import { orderStore } from '@/stores/orders';
 import { storeToRefs } from 'pinia';
 import { onMounted, ref } from 'vue';
+import Swal from 'sweetalert2';
 
 const orders = orderStore()
 const expandedOrderId = ref(null) // Tracks which order card is expanded
@@ -48,6 +49,15 @@ const changeOrderStatus = async (orderId, status) => {
     await orders.getAdminOrders()
   } catch (err) {
     console.error('Unable to update order status', err)
+    if (err.response?.status === 409) {
+      await orders.getAdminOrders()
+    }
+    await Swal.fire({
+      title: 'Unable to update order',
+      text: err.response?.data?.message || err.message,
+      icon: 'error',
+      confirmButtonText: 'Okay'
+    })
   }
 }
 </script>

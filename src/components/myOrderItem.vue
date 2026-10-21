@@ -41,12 +41,7 @@ async function confirmReceived() {
   isConfirming.value = true
 
   try {
-    const response = await api.post(`/User/orders/${item.id}/confirm-received`)
-
-    if (!response.ok) {
-      const error = await response.json()
-      throw new Error(error.error || 'Failed to confirm order')
-    }
+    await api.post(`/User/orders/${item.id}/confirm-received`)
 
     await Swal.fire({
       title: 'Confirmed',
@@ -59,7 +54,7 @@ async function confirmReceived() {
   } catch (error) {
     await Swal.fire({
       title: 'Error',
-      text: error.message,
+      text: error.response?.data?.error || error.response?.data?.message || error.message,
       icon: 'error',
       confirmButtonText: 'Okay'
     })
@@ -119,14 +114,7 @@ async function cancelOrder() {
   errorMessage.value = null;
 
   try {
-    const response = await api.post(`/User/orders/${item.id}/cancel`);
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to cancel order');
-    }
-
-    await response.json();
+    await api.post(`/User/orders/${item.id}/cancel`);
 
     await Swal.fire({
       title: 'Cancelled',
@@ -137,11 +125,11 @@ async function cancelOrder() {
 
     router.go(0);
   } catch (error) {
-    errorMessage.value = error.message;
+    errorMessage.value = error.response?.data?.error || error.response?.data?.message || error.message;
 
     await Swal.fire({
       title: 'Error',
-      text: error.message,
+      text: errorMessage.value,
       icon: 'error',
       confirmButtonText: 'Okay'
     })

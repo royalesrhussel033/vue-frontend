@@ -2,7 +2,7 @@
 import { useAuthStore } from '@/stores/auth';
 import { useCartStore } from '@/stores/cart';
 import { useCheckoutStore } from '@/stores/checkout';
-import { onMounted, ref } from 'vue';
+import { computed, ref } from 'vue';
 import Swal from 'sweetalert2'
 import { useRouter } from 'vue-router';
  
@@ -10,6 +10,14 @@ const router = useRouter()
 const auth = useAuthStore()
 const cart = useCartStore()
 const checkout = useCheckoutStore()
+const deliveryName = computed(() => `${auth.user?.first_name ?? ''} ${auth.user?.last_name ?? ''}`.trim())
+const deliveryAddress = computed(() => [
+  auth.user?.address,
+  auth.user?.city,
+  auth.user?.state,
+  auth.user?.zipcode,
+  auth.user?.country,
+].filter(Boolean).join(', '))
  
 /**
  * Generate ONE stable UUID per checkout page visit.
@@ -46,10 +54,10 @@ async function handleSubmit() {
       'zipcode',
       'country',
     ]
-    if (requiredProfileFields.some(field => !auth.user?.[field])) {
+    if (requiredProfileFields.some(field => !auth.user?.[field]?.trim())) {
         await Swal.fire({
             title: 'Complete your profile',
-            text: 'Add your delivery details to your profile before placing an order.',
+            text: 'Fill in your order details in your profile before ordering items in your cart.',
             icon: 'info',
             showCancelButton: true,
             confirmButtonText: 'Go to profile',
@@ -59,12 +67,9 @@ async function handleSubmit() {
         return
     }
  
-    const item = cart.items[0]
-    const productId = item.product_id ?? item.product?.id
-    const quantity = item.quantity ?? 1
     const payload = {
-      delivery_name: `${auth.user.first_name} ${auth.user.last_name}`,
-      delivery_address: auth.user.address,
+      delivery_name: deliveryName.value,
+      delivery_address: deliveryAddress.value,
       delivery_phone: auth.user.phone,
       items: cart.items.map(item => ({
         cart_item_id: item.id,
@@ -123,7 +128,7 @@ async function handleSubmit() {
               <div class="space-y-1">
                 <span class="text-[10px] uppercase tracking-widest text-gray-400 block font-medium">Receiver Name</span>
                 <span class="text-gray-900 font-medium text-base capitalize">
-                  {{ auth.user.first_name }} {{ auth.user.last_name }}
+                  {{ deliveryName }}
                 </span>
               </div>
  
@@ -134,7 +139,7 @@ async function handleSubmit() {
  
               <div class="sm:col-span-2 space-y-1 pt-3 border-t border-gray-100">
                 <span class="text-[10px] uppercase tracking-widest text-gray-400 block font-medium">Delivery Address</span>
-                <span class="text-gray-700 text-sm leading-relaxed block mt-0.5">{{ auth.user.address }}</span>
+                <span class="text-gray-700 text-sm leading-relaxed block mt-0.5">{{ deliveryAddress }}</span>
               </div>
             </div>
             

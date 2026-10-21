@@ -1,13 +1,29 @@
 <script setup>
 import CartItem from '@/components/cartItem.vue'
 import OrderSummary from '@/components/orderSummary.vue'
+import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
 import { storeToRefs } from 'pinia'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
 const cart = useCartStore()
+const auth = useAuthStore()
 const { items } = storeToRefs(cart)
+const needsDeliveryDetails = computed(() => {
+  const requiredProfileFields = [
+    'first_name',
+    'last_name',
+    'phone',
+    'address',
+    'city',
+    'state',
+    'zipcode',
+    'country',
+  ]
+
+  return requiredProfileFields.some(field => !auth.user?.[field]?.trim())
+})
 
 onMounted(() => {
   cart.fetchCartItem()
@@ -34,6 +50,18 @@ const removeItem = (id) => {
       <h1 class="text-3xl font-bold mb-10 tracking-tight">Shopping Bag</h1>
 
       <div v-if="items.length > 0" class="lg:grid lg:grid-cols-12 lg:gap-x-12 lg:items-start">
+        <div
+          v-if="needsDeliveryDetails"
+          class="lg:col-span-12 mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"
+          role="alert"
+        >
+          <p class="font-semibold">Complete your order details before checkout.</p>
+          <p class="mt-1">
+            Add your name and full delivery details (phone, street address, city, state, postal code, and country) to your profile to order items in your cart.
+            <RouterLink :to="{ name: 'profile' }" class="ml-1 font-semibold underline">Fill in your details</RouterLink>
+          </p>
+        </div>
+
         <!-- Product List -->
         <section class="lg:col-span-7">
           <ul class="border-t border-b border-gray-200 divide-y divide-gray-200">

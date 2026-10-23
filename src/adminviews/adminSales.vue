@@ -48,8 +48,8 @@
             
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pb-4 border-b border-gray-200 gap-4">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-800">Sales Ledger</h1>
-                    <p class="text-sm text-gray-500 mt-1">Track transactional breakdowns, quantities sold, and absolute revenue metrics.</p>
+                    <h1 class="text-3xl font-bold text-gray-900">Sales records</h1>
+                    <p class="mt-1 text-sm text-gray-500">Review completed sales, items sold, and payment status.</p>
                 </div>
             </div>
 
@@ -91,7 +91,7 @@
                             
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span :class="['px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full', getPaymentStatusClass(s.payment_status)]">
-                                    {{ s.payment_status }}
+                                    {{ s.payment_status || 'Not recorded' }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
@@ -101,8 +101,8 @@
                         </tr>
 
                         <tr v-if="!sales || sales.length === 0">
-                            <td colspan="6" class="px-6 py-10 text-center text-gray-400 italic">
-                                No sales transactions have been logged yet.
+                            <td colspan="7" class="px-6 py-10 text-center text-sm text-gray-500">
+                                No completed sales yet. Delivered orders will appear here.
                             </td>
                         </tr>
                     </tbody>

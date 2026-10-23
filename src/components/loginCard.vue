@@ -2,6 +2,7 @@
 import { computed, nextTick, ref, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from 'vue-toastification'
+import { X } from '@lucide/vue'
 
 const toast = useToast()
 const email = ref('')
@@ -32,7 +33,7 @@ const handleLogin = async () => {
     mode.value = 'two-factor'
     toast.info(result.message)
   } else if (result && auth.user) {
-    toast.success('Logged in!')
+    toast.success('You’re signed in. Welcome back!')
     emit('update:modelValue', false)
   }
 }
@@ -40,7 +41,7 @@ const handleLogin = async () => {
 const handleTwoFactor = async () => {
   const result = await auth.verifyTwoFactor(twoFactorCode.value)
   if (result && auth.user) {
-    toast.success('Logged in!')
+    toast.success('You’re signed in. Welcome back!')
     emit('update:modelValue', false)
   }
 }
@@ -81,10 +82,10 @@ const requestPasswordReset = async () => {
             {{ twoFactorRequired ? 'Verify your sign-in' : mode === 'forgot' ? 'Reset your password' : 'Sign in to your account' }}
           </h3>
           <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            {{ twoFactorRequired ? 'Enter the six-digit code sent to your verified email.' : mode === 'forgot' ? 'We’ll email a reset link if an account matches.' : 'Welcome back — enter your details to continue' }}
+            {{ twoFactorRequired ? 'Enter the six-digit code sent to your verified email address.' : mode === 'forgot' ? 'If an account matches, we’ll send a password reset link.' : 'Sign in to find your next favorite piece.' }}
           </p>
         </div>
-        <button type="button" aria-label="Close" @click="$emit('update:modelValue', false)">✕</button>
+        <button type="button" aria-label="Close sign-in" @click="$emit('update:modelValue', false)" class="rounded-lg p-2 text-gray-500 transition hover:bg-stone-100 hover:text-black"><X :size="18" /></button>
       </div>
 
       <ul v-if="auth.errors.length" class="space-y-1 px-8 pt-4 text-sm text-red-600" role="alert">
@@ -120,7 +121,7 @@ const requestPasswordReset = async () => {
           <button
             type="submit"
             :disabled="auth.loading"
-            class="w-full cursor-pointer rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-md transition hover:from-blue-700 hover:to-indigo-700 disabled:opacity-60"
+            class="w-full cursor-pointer rounded-lg bg-black px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-stone-800 disabled:opacity-60"
           >
             {{ auth.loading ? 'Signing in…' : 'Sign in' }}
           </button>
@@ -143,7 +144,7 @@ const requestPasswordReset = async () => {
         <div class="px-8">
           <button
             type="submit"
-            class="w-full rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-md"
+            class="w-full rounded-lg bg-black px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-stone-800"
           >
             Send reset link
           </button>
@@ -171,7 +172,7 @@ const requestPasswordReset = async () => {
           <button
             type="submit"
             :disabled="auth.loading"
-            class="w-full rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-md disabled:opacity-60"
+            class="w-full rounded-lg bg-black px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-stone-800 disabled:opacity-60"
           >
             {{ auth.loading ? 'Verifying…' : 'Verify and sign in' }}
           </button>

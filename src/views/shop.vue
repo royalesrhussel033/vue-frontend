@@ -12,9 +12,14 @@ const { products, categories } = storeToRefs(get)
 const isLoading = ref(true)
 
 onMounted(async () => {
-  get.fetchUserCategories()
-  get.fetchShopProducts()
+  await loadShop()
 })
+
+async function loadShop() {
+  isLoading.value = true
+  await Promise.all([get.fetchUserCategories(), get.fetchShopProducts()])
+  isLoading.value = false
+}
 
 // State
 const active = ref("All")
@@ -44,9 +49,9 @@ function showDetails(product) {
           <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             
             <div>
-              <h1 class="text-3xl font-bold tracking-tight text-gray-900">Discover Collection</h1>
+              <h1 class="text-3xl font-bold tracking-tight text-gray-900">Find your next favorite</h1>
               <p class="mt-1 text-sm text-gray-500">
-                Showing {{ visible.length }} {{ visible.length === 1 ? "piece" : "pieces" }} curated garments
+                {{ visible.length }} {{ visible.length === 1 ? "pre-loved piece" : "pre-loved pieces" }} to explore
               </p>
             </div>
 
@@ -59,7 +64,7 @@ function showDetails(product) {
               <input
                 v-model="query"
                 type="text"
-                placeholder="Search products..."
+                placeholder="Search pre-loved clothing"
                 aria-label="Search products"
                 class="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black focus:bg-white transition-all"
               />
@@ -76,7 +81,7 @@ function showDetails(product) {
                 ? 'bg-black text-white border-black shadow-sm' 
                 : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400 hover:text-gray-900'"
             >
-              All Items
+              Shop all
             </button>
             <button
               v-for="c in categories"
@@ -95,12 +100,22 @@ function showDetails(product) {
 
       <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
-        <div v-if="visible.length === 0" class="bg-white rounded-2xl border border-dashed border-gray-300 py-24 text-center shadow-sm">
+        <div v-if="isLoading" class="bg-white rounded-2xl border border-gray-100 py-24 text-center shadow-sm" role="status" aria-live="polite">
+          <div class="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-gray-200 border-t-black"></div>
+          <p class="mt-4 text-sm text-gray-500">Looking for your next great find…</p>
+        </div>
+
+        <div v-else-if="get.shopError" class="rounded-2xl border border-red-200 bg-red-50 py-16 text-center shadow-sm" role="alert">
+          <h3 class="text-sm font-semibold text-red-900">{{ get.shopError }}</h3>
+          <button @click="loadShop" class="mt-4 rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-900 transition hover:bg-red-100">Try again</button>
+        </div>
+
+        <div v-else-if="visible.length === 0" class="bg-white rounded-2xl border border-dashed border-gray-300 py-24 text-center shadow-sm">
           <svg  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="mx-auto h-10 w-10 text-gray-400 mb-3">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
           </svg>
-          <h3 class="text-sm font-semibold text-gray-900">No items match filters</h3>
-          <p class="mt-1 text-xs text-gray-500">Try tweaking your keywords or trying another product group tab.</p>
+          <h3 class="text-sm font-semibold text-gray-900">No finds match those filters yet</h3>
+          <p class="mt-1 text-xs text-gray-500">Try another search or category to uncover more pieces.</p>
         </div>
 
         <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

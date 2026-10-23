@@ -1,6 +1,6 @@
 <script setup>
-import { Router } from 'lucide-vue-next'
 import { computed } from 'vue'
+import { RouterLink } from 'vue-router'
 const props = defineProps(['items'])
 
 const subtotal = computed(() => props.items.reduce((acc, i) => acc + (i.price * i.quantity), 0))
@@ -11,7 +11,7 @@ const total = computed(() => subtotal.value + shipping.value + tax.value)
 
 <template>
   <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 sticky top-8">
-    <h2 class="text-lg font-semibold text-gray-900 border-b border-gray-100 pb-4">Order Summary</h2>
+    <h2 class="border-b border-gray-100 pb-4 text-lg font-semibold text-gray-900">Your total</h2>
 
     <dl class="mt-6 space-y-4">
       <div class="flex items-center justify-between">
@@ -20,14 +20,14 @@ const total = computed(() => subtotal.value + shipping.value + tax.value)
       </div>
       <div class="flex items-center justify-between border-t border-gray-100 pt-4">
         <dt class="flex items-center text-sm text-gray-600">
-          <span>Shipping estimate</span>
+          <span>Shipping</span>
         </dt>
         <dd class="text-sm font-medium text-gray-900">
           {{ shipping === 0 ? 'Free' : '₱' + shipping.toFixed(2) }}
         </dd>
       </div>
       <div class="flex items-center justify-between border-t border-gray-100 pt-4">
-        <dt class="text-sm text-gray-600">Tax estimate</dt>
+        <dt class="text-sm text-gray-600">Tax</dt>
         <dd class="text-sm font-medium text-gray-900">₱{{ tax.toFixed(2) }}</dd>
       </div>
       <div class="flex items-center justify-between border-t border-gray-100 pt-4 text-lg font-bold text-gray-900">
@@ -36,18 +36,12 @@ const total = computed(() => subtotal.value + shipping.value + tax.value)
       </div>
     </dl>
 
-    <div class="mt-10">
-      <button class="w-full bg-indigo-600 border border-transparent rounded-xl py-4 px-4 text-base font-bold text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all active:scale-[0.98]">
-        <RouterLink :to="{ name: 'checkOut' }">
-          Checkout
-        </RouterLink>
-        
-      </button>
-    </div>
+    <RouterLink :to="{ name: 'checkOut' }" class="mt-8 inline-flex w-full items-center justify-center rounded-xl border border-transparent bg-black px-4 py-4 text-base font-bold text-white shadow-sm transition-all hover:bg-gray-800 active:scale-[0.98]">
+      Continue to checkout
+    </RouterLink>
 
     <div class="mt-6 text-center text-sm text-gray-500">
-      <p>or <a class="text-indigo-600 font-medium hover:text-indigo-500">
-        <RouterLink :to="{ name: 'shop' }">Continue Shopping</RouterLink> </a></p>
+      <p>Still browsing? <RouterLink :to="{ name: 'shop' }" class="font-medium text-gray-900 underline underline-offset-4 hover:text-gray-600">Find another piece</RouterLink></p>
     </div>
   </div>
 </template>

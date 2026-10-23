@@ -63,7 +63,7 @@ export const useAuthStore = defineStore('auth', {
         } else if (error.response?.data?.message) {
           this.errors = [error.response.data.message]
         } else {
-          this.errors = ['An unexpected error occured. Please try again.']
+          this.errors = ['We couldn’t sign you in. Please check your details and try again.']
         }
         return null
       } finally {

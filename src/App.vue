@@ -27,7 +27,7 @@
 
       <main class="flex-1">
         <div class="min-h-[70vh] flex items-center justify-center">
-          <div class="text-sm text-gray-500">Loading...</div>
+          <div class="text-sm text-gray-500" role="status" aria-live="polite">Getting the shop ready…</div>
         </div>
       </main>
 

@@ -1,7 +1,5 @@
 <script setup>
 import { orderStore } from '@/stores/orders';
-import { RouterLink } from 'vue-router';
-import { useRouter } from 'vue-router';
 import { ref, onMounted } from 'vue';
 import ProductDetailsModal from './productDetailsModal.vue';
 import { useProductStore } from '@/stores/products';
@@ -54,7 +52,7 @@ async function confirmReceived() {
   } catch (error) {
     await Swal.fire({
       title: 'Error',
-      text: error.response?.data?.error || error.response?.data?.message || error.message,
+      text: error.response?.data?.message || error.response?.data?.error || 'We couldn’t confirm delivery. Please try again.',
       icon: 'error',
       confirmButtonText: 'Okay'
     })
@@ -85,12 +83,9 @@ function showDetails(orderItem) {
   }
 }
 
-const order = orderStore()
-
 // this is for Cancel Order
 const isLoading = ref(false);
 const errorMessage = ref(null);
-const router = useRouter();
 
 const canCancel = () => {
   const cancellableStatuses = ['Pending', 'Processing'];
@@ -103,9 +98,8 @@ async function cancelOrder() {
     text: 'Are you sure you want to cancel this order?',
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#d33',
-    cancelButtonColor: '#3085d6',
-    confirmButtonText: 'Yes, cancel it'
+    confirmButtonText: 'Cancel this order',
+    cancelButtonText: 'Keep order'
   }) 
 
   if (!result.isConfirmed) return
@@ -117,15 +111,17 @@ async function cancelOrder() {
     await api.post(`/User/orders/${item.id}/cancel`);
 
     await Swal.fire({
-      title: 'Cancelled',
-      text: 'Order cancelled successfully.',
+      title: 'Order cancelled',
+      text: 'This order has been cancelled. The piece is no longer reserved for you.',
       icon: 'success',
       confirmButtonText: 'Okay'
     })
 
-    router.go(0);
+    emit('confirmed')
   } catch (error) {
-    errorMessage.value = error.response?.data?.error || error.response?.data?.message || error.message;
+    errorMessage.value = error.response?.data?.message
+      || error.response?.data?.error
+      || 'We couldn’t cancel this order. Please refresh and try again.';
 
     await Swal.fire({
       title: 'Error',
@@ -159,9 +155,7 @@ async function cancelOrder() {
         <div>
           <div class="flex justify-between">
             <h3 class="text-base font-medium text-gray-900">
-              <RouterLink :to="`/shop/${item.id}`" class="hover:text-indigo-600 transition-colors">
-                {{ item.name }}
-              </RouterLink>
+              {{ item.name }}
             </h3>
           </div>
           <p v-if="item.color" class="mt-1 text-sm text-gray-500">{{ item.color }}</p>
@@ -174,8 +168,7 @@ async function cancelOrder() {
         <!-- Order Status & Quantity -->
         <div class="mt-4 sm:mt-0 flex flex-col items-start sm:items-end">
           <!-- Status Badge -->
-          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mb-2">
-            <!-- Assuming your data has an item.status, otherwise defaulting to 'Processing' -->
+          <span class="mb-2 inline-flex items-center rounded-full bg-stone-100 px-2.5 py-0.5 text-xs font-medium text-stone-700">
             {{ item.status || 'Processing' }}
           </span>
           <p class="text-sm text-gray-600">Qty: <span class="font-medium text-gray-900">{{ item.quantity }}</span></p>
@@ -194,27 +187,19 @@ async function cancelOrder() {
             class="font-medium text-red-600 hover:text-red-900 hover:cursor-pointer transition-colors disabled:opacity-50">
             {{ isLoading ? 'Cancelling...' : 'Cancel Order' }}
           </button>
-          <button 
-            v-else
-            disabled
-            class="font-medium text-gray-400 cursor-not-allowed"
-            title="Cannot cancel orders that are being delivered or completed"
-            >
-            Cannot Cancel
-          </button>
           <button
             v-if="item.status === 'Delivered'"
             @click="confirmReceived"
             :disabled="isConfirming"
-            class="hover:cursor-pointer font-medium text-green-600 hover:text-green-900 transition-colors disabled:opacity-50">
+            class="hover:cursor-pointer font-medium text-gray-700 hover:text-black transition-colors disabled:opacity-50">
             {{ isConfirming ? 'Confirming...' : 'Confirm Received' }}
           </button>
           
-          <button @click="openDetails" class="hover:cursor-pointer font-medium text-indigo-600 hover:text-black transition-colors">
+          <button @click="openDetails" class="hover:cursor-pointer font-medium text-gray-700 hover:text-black transition-colors">
             View Details
           </button>
           <span class="text-gray-300" aria-hidden="true">|</span>
-          <button @click="showDetails(item)" class="hover:cursor-pointer hover:text-black  font-medium text-indigo-600 transition-colors">
+          <button @click="showDetails(item)" class="hover:cursor-pointer hover:text-black font-medium text-gray-700 transition-colors">
             Buy Again
           </button>
         </div>

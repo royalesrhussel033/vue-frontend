@@ -4,16 +4,14 @@ import orderDetailsModal from '@/components/orderDetailsModal.vue';
 import orderRatingModal from '@/components/orderRatingModal.vue';
 import { orderStore } from '@/stores/orders';
 import { storeToRefs } from 'pinia';
+import { Star } from '@lucide/vue'
 
 const formatDate = (value) => {
-return new Date(value).toLocaleString('en-PH', {
-year: 'numeric',
-month: 'short',
-day: 'numeric',
-hour: 'numeric',
-minute: '2-digit',
-second: '2-digit'
-})
+  return new Date(value).toLocaleString('en-PH', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  })
 }
 const order = orderStore()
 const { items, isLoading } = storeToRefs(order)
@@ -66,8 +64,8 @@ function openRatingModal(productId) {
       <div class="mb-10 sm:flex sm:items-baseline sm:justify-between gap-4">
         <div>
           <h1 class="text-3xl font-bold tracking-tight text-gray-900">Order History</h1>
-          <p class="text-sm text-gray-500 mt-2 sm:mt-0">
-            Check the status of recent orders, manage returns, and download invoices.
+          <p class="mt-2 text-sm text-gray-500 sm:mt-0">
+            Revisit the pre-loved pieces you’ve purchased and leave a review.
           </p>
         </div>
 
@@ -75,13 +73,14 @@ function openRatingModal(productId) {
           <input
             v-model="searchQuery"
             type="text"
-            placeholder="SEARCH ORDER OR ITEM..."
-            class="w-full bg-transparent text-xs tracking-widest focus:outline-none uppercase placeholder-gray-400"
+            placeholder="Search orders or pieces"
+            aria-label="Search orders or pieces"
+            class="w-full bg-transparent py-2 text-sm focus:outline-none placeholder-gray-400"
           />
         </div>
       </div>
 
-      <div class="flex gap-6 text-sm tracking-wide border-b border-gray-200 mb-8 pb-2">
+      <div class="mb-8 flex gap-6 border-b border-gray-200 pb-2 text-sm tracking-wide">
         <button
           v-for="status in ['All Orders']"
           :key="status"
@@ -89,7 +88,7 @@ function openRatingModal(productId) {
           :class="[
             'pb-2 transition-all relative font-light',
             activeFilter === status
-              ? 'font-medium text-indigo-600 border-b-2 border-indigo-600 -mb-2.5'
+              ? 'font-medium text-black border-b-2 border-black -mb-2.5'
               : 'text-gray-400 hover:text-gray-600'
           ]"
         >
@@ -98,13 +97,17 @@ function openRatingModal(productId) {
       </div>
 
       <div v-if="isLoading" class="flex justify-center py-20">
-        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
+        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-black" role="status" aria-label="Loading order history"></div>
+      </div>
+
+      <div v-else-if="order.error" class="rounded-xl border border-red-200 bg-red-50 p-5 text-sm text-red-800" role="alert">
+        {{ order.error }}
       </div>
 
       <div v-else class="lg:grid lg:grid-cols-12 lg:gap-x-12 lg:items-start">
         
         <div v-if="filteredOrders.length === 0" class="lg:col-span-12 text-center py-20 bg-white rounded-lg border border-gray-200 text-gray-400 font-light tracking-wide">
-          No past transactions found.
+          No past orders match your search.
         </div>
 
         <section v-else class="lg:col-span-12 space-y-6">
@@ -149,8 +152,7 @@ function openRatingModal(productId) {
                         </p>
                       </div>
                       <div class="mt-2 sm:mt-0">
-                        <span class="text-xs tracking-widest uppercase inline-flex items-center gap-2 font-medium text-gray-700">
-                          <span :class="[ item.status === 'Delivered' ? 'text-green-600' : 'text-gray-400']">✓</span>
+                        <span class="inline-flex items-center gap-2 text-xs font-medium uppercase tracking-widest text-gray-700">
                           {{ item.status }}
                         </span>
                       </div>
@@ -161,14 +163,12 @@ function openRatingModal(productId) {
                     <div v-if="item.my_rating"
                       class="text-xs tracking-widest uppercase border border-gray-200 bg-gray-50 text-black px-4 py-2 w-full sm:w-36 text-center rounded-md"
                     >
-                      <span v-for="star in 5" :key="star" class="text-sm" :class="star <= item.my_rating ? 'text-yellow-500' : 'text-gray-300'">
-                        ★
-                      </span>   
+                      <Star v-for="star in 5" :key="star" :size="15" :fill="star <= item.my_rating ? 'currentColor' : 'none'" :class="star <= item.my_rating ? 'text-amber-500' : 'text-gray-300'" aria-hidden="true" />
                     </div>
                     
                     <button 
                       v-else
-                      class="text-xs tracking-widest uppercase border border-gray-300 bg-white text-gray-700 px-4 py-2 hover:border-indigo-600 hover:text-indigo-600 transition-colors w-full sm:w-36 text-center rounded-md font-medium cursor-pointer"
+                      class="text-xs tracking-widest uppercase border border-gray-300 bg-white text-gray-700 px-4 py-2 hover:border-black hover:text-black transition-colors w-full sm:w-36 text-center rounded-md font-medium cursor-pointer"
                       @click="openRatingModal(item.product_id)"
                     >
                       Rate Product
@@ -176,8 +176,8 @@ function openRatingModal(productId) {
 
                     <button  
                       @click="openOrderDetails(item.id)"
-                      class="text-xs tracking-widest uppercase border border-gray-300 bg-white text-gray-700 px-4 py-2 hover:border-indigo-600 hover:text-indigo-600 transition-colors w-full sm:w-36 text-center rounded-md font-medium cursor-pointer">
-                      Details
+                      class="text-xs tracking-widest uppercase border border-gray-300 bg-white text-gray-700 px-4 py-2 hover:border-black hover:text-black transition-colors w-full sm:w-36 text-center rounded-md font-medium cursor-pointer">
+                      View details
                     </button>
                   </div>
                 </div>

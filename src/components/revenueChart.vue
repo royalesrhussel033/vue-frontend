@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue';
 import { Line } from 'vue-chartjs';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import { api } from '@/lib/api'
+import { TrendingUp } from '@lucide/vue'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
@@ -74,10 +75,10 @@ const chartOptions = {
 
 <template>
   <div class="bg-white rounded-lg shadow p-6">
-    <h2 class="text-lg font-semibold text-gray-900 mb-4">📈 Revenue Trend</h2>
+    <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900"><TrendingUp :size="19" /> Revenue trend</h2>
     
     <div v-if="isLoading" class="text-center py-8 text-gray-500">
-      Loading chart...
+      Loading revenue…
     </div>
     
     <Line 
@@ -88,7 +89,7 @@ const chartOptions = {
     />
     
     <div v-else class="text-center py-8 text-gray-500">
-      No data available
+      Revenue data isn’t available right now.
     </div>
   </div>
 </template>

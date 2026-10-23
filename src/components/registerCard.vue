@@ -2,6 +2,7 @@
 import { reactive, ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from 'vue-toastification'
+import { X } from '@lucide/vue'
 
 const toast = useToast()
 const auth = useAuthStore()
@@ -40,9 +41,9 @@ const submitForm = async () => {
       <div class="flex items-center justify-between mb-6 border-b pb-3">
         <div>
           <h3 id="register-title" class="text-lg font-semibold">Create your account</h3>
-          <p class="mt-1 text-sm text-slate-500">Add your delivery details to your profile later.</p>
+          <p class="mt-1 text-sm text-slate-500">You can add delivery details to your profile whenever you’re ready.</p>
         </div>
-        <button type="button" @click="$emit('update:modelValue', false)" aria-label="Close registration">✕</button>
+        <button type="button" @click="$emit('update:modelValue', false)" aria-label="Close registration" class="rounded-lg p-2 text-gray-500 transition hover:bg-stone-100 hover:text-black"><X :size="18" /></button>
       </div>
 
       <ul v-if="auth.errors.length" class="mb-4 space-y-1 text-sm text-red-600" role="alert">
@@ -59,7 +60,7 @@ const submitForm = async () => {
             autocomplete="email"
             required
             maxlength="255"
-            class="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full rounded-lg border border-stone-200 px-4 py-3 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-stone-500"
             placeholder="you@gmail.com"
           />
         </div>
@@ -74,12 +75,12 @@ const submitForm = async () => {
               autocomplete="new-password"
               required
               minlength="9"
-              class="min-w-0 flex-1 rounded-l-lg border border-slate-200 px-4 py-3 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="min-w-0 flex-1 rounded-l-lg border border-stone-200 px-4 py-3 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-stone-500"
               placeholder="At least 9 characters"
             />
             <button
               type="button"
-              class="rounded-r-lg border border-l-0 border-slate-200 px-3 text-sm text-blue-700"
+              class="rounded-r-lg border border-l-0 border-stone-200 px-3 text-sm text-stone-700"
               :aria-label="showPassword ? 'Hide password' : 'Show password'"
               @click="showPassword = !showPassword"
             >
@@ -99,12 +100,12 @@ const submitForm = async () => {
               autocomplete="new-password"
               required
               minlength="9"
-              class="min-w-0 flex-1 rounded-l-lg border border-slate-200 px-4 py-3 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="min-w-0 flex-1 rounded-l-lg border border-stone-200 px-4 py-3 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-stone-500"
               placeholder="Enter your password again"
             />
             <button
               type="button"
-              class="rounded-r-lg border border-l-0 border-slate-200 px-3 text-sm text-blue-700"
+              class="rounded-r-lg border border-l-0 border-stone-200 px-3 text-sm text-stone-700"
               :aria-label="showPasswordConfirmation ? 'Hide confirmation' : 'Show confirmation'"
               @click="showPasswordConfirmation = !showPasswordConfirmation"
             >
@@ -116,13 +117,13 @@ const submitForm = async () => {
         <button
           type="submit"
           :disabled="auth.loading"
-          class="w-full rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-md transition hover:from-blue-700 hover:to-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+          class="w-full rounded-lg bg-black px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {{ auth.loading ? 'Creating account…' : 'Create account' }}
         </button>
       </form>
 
-      <button @click="$emit('switch-to-login')" class="mt-5 text-sm text-blue-600 hover:underline">
+      <button @click="$emit('switch-to-login')" class="mt-5 text-sm text-stone-700 hover:text-black hover:underline">
         Already have an account? Sign in
       </button>
     </div>

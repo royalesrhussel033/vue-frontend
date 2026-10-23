@@ -1,6 +1,7 @@
 <script setup>
 import Swal from 'sweetalert2'
 import { useCartStore } from '@/stores/cart';
+import { Check, Minus, Plus, X } from '@lucide/vue'
 
 defineProps(['item'])
 defineEmits(['update', 'remove'])
@@ -9,25 +10,32 @@ const cart = useCartStore()
 
 const confirmRemove = async (id) => {
   const result = await Swal.fire({
-    title: 'Remove item?',
-    text: 'This product will be removed from your cart.',
+    title: 'Remove this piece?',
+    text: 'It will be taken out of your shopping bag.',
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#d33',
-    cancelButtonColor: '#3085d6',
-    confirmButtonText: 'Yes, remove it'
+    confirmButtonText: 'Remove piece',
+    cancelButtonText: 'Keep it'
   })
 
   if (result.isConfirmed) {
-    await cart.removeCartItem(id)
-
-    Swal.fire({
-      title: 'Removed',
-      text: 'Item has been removed from your cart.',
-      icon: 'success',
-      timer: 1500,
-      showConfirmButton: false
-    })
+    try {
+      await cart.removeCartItem(id)
+      await Swal.fire({
+        title: 'Removed from your bag',
+        text: 'This piece is no longer in your cart.',
+        icon: 'success',
+        timer: 1500,
+        showConfirmButton: false
+      })
+    } catch (error) {
+      await Swal.fire({
+        title: 'Couldn’t remove this piece',
+        text: error.response?.data?.message || 'Please refresh your bag and try again.',
+        icon: 'error',
+        confirmButtonText: 'Okay'
+      })
+    }
   }
 }
 </script>
@@ -43,10 +51,9 @@ const confirmRemove = async (id) => {
         <div>
           <div class="flex justify-between">
             <h3 class="text-sm">
-              <a href="#" class="font-medium text-gray-700 hover:text-gray-800">{{ item.name }}</a>
+              <span class="font-medium text-gray-900">{{ item.name }}</span>
             </h3>
           </div>
-          <!-- <p class="mt-1 text-sm text-gray-500">{{ item.color }}</p> -->
           <p  class="mt-1 text-sm font-semibold text-gray-900">₱{{ item.price.toFixed(2) }}</p>
           <p class="text-sm text-gray-500">
             Size: <span class="font-medium">{{ item.size_name || 'N/A' }}</span>
@@ -55,28 +62,24 @@ const confirmRemove = async (id) => {
 
         <div class="mt-4 sm:mt-0 sm:pr-9">
           <div class="flex items-center space-x-3 border border-gray-300 w-max rounded-md px-2 py-1">
-            <button @click="$emit('update', item.id, -1)" class="text-gray-500 hover:text-black px-1">-</button>
+            <button @click="$emit('update', item.id, -1)" :aria-label="`Decrease ${item.name} quantity`" class="px-1 text-gray-500 hover:text-black"><Minus :size="15" /></button>
             <span class="text-sm font-medium w-4 text-center">{{ item.quantity }}</span>
-            <button @click="$emit('update', item.id, 1)" class="text-gray-500 hover:text-black px-1">+</button>
+            <button @click="$emit('update', item.id, 1)" :aria-label="`Increase ${item.name} quantity`" class="px-1 text-gray-500 hover:text-black"><Plus :size="15" /></button>
           </div>
 
           
 
           <div class="absolute top-0 right-0">
-            <button @click="confirmRemove(item.id)" class="inline-flex p-2 text-gray-400 hover:text-gray-500">
-              <svg class="h-5 w-5 hover:cursor-pointer" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-              </svg>
+            <button @click="confirmRemove(item.id)" :aria-label="`Remove ${item.name} from your bag`" class="inline-flex p-2 text-gray-400 hover:text-gray-700">
+              <X :size="18" aria-hidden="true" />
             </button>
           </div>
         </div>
       </div>
       
       <p class="mt-4 flex text-sm text-gray-700 space-x-2">
-        <svg class="shrink-0 h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-        </svg>
-        <span>In stock</span>
+        <Check class="shrink-0 text-emerald-700" :size="19" aria-hidden="true" />
+        <span>A pre-loved piece selected just for you</span>
       </p>
     </div>
   </li>

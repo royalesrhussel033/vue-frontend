@@ -39,7 +39,7 @@ async function getAdminContact() {
         const response = await api.get('/Admin/adminContact')
         contacts.value = response.data
     } catch (err) {
-        errors.value = err.response?.data?.message || 'Failed to load contacts.'
+        errors.value = err.response?.data?.message || 'We couldn’t load customer messages. Please try again.'
     } finally {
         loading.value = false
     }
@@ -54,7 +54,10 @@ onMounted(() => {
     <adminSidebar>
         <div class="w-full p-6  mx-auto"> 
             <div class="flex justify-between items-center mb-8 pb-4 border-b border-gray-200"> 
-                <h1 class="text-3xl font-bold text-gray-800">Customer Contacts</h1> 
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Customer messages</h1>
+                    <p class="mt-1 text-sm text-gray-500">Read incoming questions and reply directly by email.</p>
+                </div>
             </div>
 
             <div v-if="loading" class="text-gray-600 flex items-center justify-center p-12">
@@ -74,7 +77,8 @@ onMounted(() => {
                 >
                     <button 
                         @click="toggleCard(contact.id)"
-                        class="cursor-pointer w-full text-left p-5 focus:outline-none flex justify-between items-start gap-4 select-none"
+                        class="flex w-full cursor-pointer items-start justify-between gap-4 p-5 text-left transition hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-black"
+                        :aria-expanded="expandedCardId === contact.id"
                     >
                         <div class="flex-1 min-w-0">
                             <div class="text-base font-semibold text-gray-900 truncate">
@@ -99,7 +103,7 @@ onMounted(() => {
                         class="px-5 pb-5 pt-2 border-t border-gray-100 bg-gray-50/50"
                     >
                         <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                            Message Content
+                            Customer message
                         </div>
                         
                         <p class="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap bg-white p-4 rounded-lg border border-gray-100 shadow-inner">
@@ -119,7 +123,7 @@ onMounted(() => {
                 </div>
 
                 <div v-if="contacts.length === 0" class="text-center py-12 bg-white rounded-xl border border-gray-200 border-dashed text-gray-500 italic">
-                    No contact messages found.
+                    No messages yet. Customer questions will appear here.
                 </div>
             </div>
         </div>

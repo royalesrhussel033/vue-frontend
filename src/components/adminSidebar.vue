@@ -22,17 +22,18 @@ const visibleNavItems = computed(() =>
 </script>
 
 <template>
-  <div class="flex min-h-screen w-full overflow-hidden bg-stone-50">
+  <div class="flex h-screen min-h-0 w-full overflow-hidden bg-stone-50">
     <aside
       :class="[
         isOpen ? 'w-16 md:w-64' : 'w-16 md:w-20',
-        'flex shrink-0 flex-col border-r border-stone-200 bg-white transition-all duration-300'
+        'flex h-full shrink-0 flex-col overflow-y-auto border-r border-stone-200 bg-white transition-[width] duration-300'
       ]"
     >
-      <div class="flex items-center justify-between border-b border-stone-200 p-3 md:p-4">
-        <RouterLink :to="{ name: 'Admindashboard' }" class="hidden text-lg font-semibold tracking-wide text-stone-900 md:block">
+      <div :class="['flex items-center border-b border-stone-200 p-3 md:p-4', isOpen ? 'justify-between' : 'justify-center md:justify-between']">
+        <RouterLink v-if="isOpen" :to="{ name: 'Admindashboard' }" class="hidden min-w-0 text-lg font-semibold tracking-wide text-stone-900 md:block">
           Thrifting Genix
         </RouterLink>
+        <span v-else class="hidden text-sm font-bold text-stone-900 md:block" aria-label="Thrifting Genix">TG</span>
         <span class="text-sm font-bold text-stone-900 md:hidden" aria-label="Thrifting Genix">TG</span>
         <button
           type="button"
@@ -40,13 +41,15 @@ const visibleNavItems = computed(() =>
           class="rounded-lg p-2 transition hover:bg-stone-100"
           :aria-label="isOpen ? 'Collapse admin navigation' : 'Expand admin navigation'"
           :title="isOpen ? 'Collapse navigation' : 'Expand navigation'"
+          aria-controls="admin-navigation"
+          :aria-expanded="isOpen"
         >
           <X v-if="isOpen" :size="19" />
           <Menu v-else :size="19" />
         </button>
       </div>
 
-      <nav class="flex-1 space-y-1 p-2 md:p-3" aria-label="Admin navigation">
+      <nav id="admin-navigation" class="flex-1 space-y-1 p-2 md:p-3" aria-label="Admin navigation">
         <RouterLink
           v-for="item in visibleNavItems"
           :key="item.label"
@@ -54,15 +57,18 @@ const visibleNavItems = computed(() =>
           :title="item.label"
           :aria-label="item.label"
           active-class="bg-stone-100 font-semibold text-black"
-          class="flex items-center justify-center gap-3 rounded-xl px-3 py-3 text-stone-600 transition-colors hover:bg-stone-50 hover:text-black md:justify-start md:px-4"
+          :class="[
+            'flex items-center gap-3 overflow-hidden rounded-xl py-3 text-stone-600 transition-colors hover:bg-stone-50 hover:text-black',
+            isOpen ? 'justify-center px-3 md:justify-start md:px-4' : 'justify-center px-3'
+          ]"
         >
           <component :is="item.icon" :size="19" aria-hidden="true" />
-          <span v-if="isOpen" class="hidden text-sm md:inline">{{ item.label }}</span>
+          <span v-if="isOpen" class="hidden min-w-0 truncate text-sm md:inline">{{ item.label }}</span>
         </RouterLink>
       </nav>
     </aside>
 
-    <main class="min-w-0 flex-1 overflow-y-auto">
+    <main class="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain">
       <slot />
     </main>
   </div>

@@ -71,77 +71,98 @@ const goToSizePage = (page) => {
 // Delete Product
 const confirmDeleteProduct = async(id) => {
   const result = await Swal.fire({
-    title: 'Delete product?',
-    text: 'This action cannot be undone.',
+    title: 'Remove this product?',
+    text: 'This piece will no longer appear in the shop.',
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#d33',
-    cancelButtonColor: '#3085d6',
-    confirmButtonText: 'Yes, delete it'
+    confirmButtonText: 'Remove product',
+    cancelButtonText: 'Keep product'
     })
 
     if (!result.isConfirmed) return
 
-    await productStore.destroyProduct(id)
-
-    await Swal.fire({
-    title: 'Deleted',
-    text: 'Product deleted successfully.',
-    icon: 'success',
-    timer: 1500,
-    showConfirmButton: false
-    })
+    try {
+      await productStore.destroyProduct(id)
+      await Swal.fire({
+        title: 'Product removed',
+        text: 'The piece is no longer listed in the shop.',
+        icon: 'success',
+        timer: 1500,
+        showConfirmButton: false
+      })
+    } catch (error) {
+      await Swal.fire({
+        title: 'Couldn’t remove this product',
+        text: error.response?.data?.message || 'Please refresh the inventory and try again.',
+        icon: 'error',
+        confirmButtonText: 'Okay'
+      })
+    }
 }
 
 // Delete Category
 const confirmDeleteCategory = async(id) => {
   const result = await Swal.fire({
-    title: 'Delete category?',
-    text: 'This action cannot be undone.',
+    title: 'Delete this category?',
+    text: 'Products in this category won’t be deleted.',
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#d33',
-    cancelButtonColor: '#3085d6',
-    confirmButtonText: 'Yes, delete it'
+    confirmButtonText: 'Delete category',
+    cancelButtonText: 'Keep category'
     })
 
     if (!result.isConfirmed) return
 
-    await productStore.destroyCategory(id)
-
-    await Swal.fire({
-    title: 'Deleted',
-    text: 'Category deleted successfully.',
-    icon: 'success',
-    timer: 1500,
-    showConfirmButton: false
-    })
+    try {
+      await productStore.destroyCategory(id)
+      await Swal.fire({
+        title: 'Category deleted',
+        text: 'The category has been removed.',
+        icon: 'success',
+        timer: 1500,
+        showConfirmButton: false
+      })
+    } catch (error) {
+      await Swal.fire({
+        title: 'Couldn’t delete this category',
+        text: error.response?.data?.message || 'Please refresh the inventory and try again.',
+        icon: 'error',
+        confirmButtonText: 'Okay'
+      })
+    }
 }
 
 // Delete Size
 const confirmDeleteSize = async (id) => {
   const result = await Swal.fire({
-    title: 'Delete size?',
-    text: 'This action cannot be undone.',
+    title: 'Delete this size?',
+    text: 'The size option will be removed from your catalog.',
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#d33',
-    cancelButtonColor: '#3085d6',
-    confirmButtonText: 'Yes, delete it'
+    confirmButtonText: 'Delete size',
+    cancelButtonText: 'Keep size'
   })
 
   if (!result.isConfirmed) return
 
-  await api.delete(`/Admin/destroyAdminSizes/${id}`)
-  await fetchSizes()
-
-  await Swal.fire({
-    title: 'Deleted',
-    text: 'Size deleted successfully.',
-    icon: 'success',
-    timer: 1500,
-    showConfirmButton: false
-  })
+  try {
+    await api.delete(`/Admin/destroyAdminSizes/${id}`)
+    await fetchSizes()
+    await Swal.fire({
+      title: 'Size deleted',
+      text: 'The size option has been removed.',
+      icon: 'success',
+      timer: 1500,
+      showConfirmButton: false
+    })
+  } catch (error) {
+    await Swal.fire({
+      title: 'Couldn’t delete this size',
+      text: error.response?.data?.message || 'Please refresh the inventory and try again.',
+      icon: 'error',
+      confirmButtonText: 'Okay'
+    })
+  }
 }
 
 const productStore = useProductStore()
@@ -170,25 +191,25 @@ onMounted(() => {
     <div class="w-full p-6">
       
       <div class="flex justify-between items-center mb-8 pb-4 border-b border-gray-200">
-        <h1 class="text-3xl font-bold text-gray-800">Products Management</h1>
+        <h1 class="text-3xl font-bold text-gray-900">Manage inventory</h1>
         <div class="flex gap-4">
           <RouterLink :to="{ name: 'sizes' }" class="px-5 py-2.5 bg-gray-300 hover:bg-gray-600 text-gray-600 hover:text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200 flex items-center">
             <CirclePlus :size="18" /> 
-            <p class="px-2">Add Sizes</p>
+            <p class="px-2">Add size</p>
           </RouterLink>
           <RouterLink :to="{ name: 'addproduct' }" class="px-5 py-2.5 bg-indigo-100 hover:bg-indigo-600 text-indigo-600 hover:text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200 flex items-center">
             <CirclePlus :size="18" /> 
-            <p class="px-2">Add Product</p>
+            <p class="px-2">Add product</p>
           </RouterLink>
           <RouterLink :to="{ name: 'addcategories' }" class="px-3 py-2.5 bg-emerald-100 hover:bg-emerald-600 text-emerald-600 hover:text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200 flex items-center">
             <CirclePlus :size="18" /> 
-            <p class="px-2">Add Categories</p>
+            <p class="px-2">Add category</p>
           </RouterLink>
         </div>
       </div>
       
       <div class="mb-12">
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">Products List</h2>
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Products</h2>
         
         <div class="overflow-x-auto bg-white rounded-xl shadow-sm border border-gray-200">
           <table class="min-w-full divide-y divide-gray-200">
@@ -197,7 +218,7 @@ onMounted(() => {
                 <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Product</th>
                 <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Description</th>
                 <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Price</th>
-                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Stock</th>
+                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Quantity</th>
                 <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Category</th>
                 <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Sizes</th>
                 <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Image</th>
@@ -229,17 +250,17 @@ onMounted(() => {
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
                   <div class="flex justify-center gap-3">
-                    <RouterLink :to="{ name: 'editproduct', params: { id: p.id } }" class="px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white font-medium rounded-md transition-colors duration-200">
+                    <RouterLink :to="{ name: 'editproduct', params: { id: p.id } }" :aria-label="`Edit ${p.name}`" class="px-3 py-1.5 bg-stone-100 text-stone-700 hover:bg-stone-900 hover:text-white font-medium rounded-md transition-colors duration-200">
                       <SquarePen :size="16" />
                     </RouterLink>
-                    <button @click="confirmDeleteProduct(p.id)" class="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white hover:cursor-pointer font-medium rounded-md transition-colors duration-200">
+                    <button @click="confirmDeleteProduct(p.id)" :aria-label="`Remove ${p.name}`" class="px-3 py-1.5 bg-red-50 text-red-700 hover:bg-red-700 hover:text-white hover:cursor-pointer font-medium rounded-md transition-colors duration-200">
                       <Trash2 :size="16" />
                     </button>
                   </div>
                 </td>
               </tr>
               <tr v-if="products.length === 0">
-                <td colspan="8" class="px-6 py-8 text-center text-gray-500 italic">No products found.</td>
+                <td colspan="8" class="px-6 py-8 text-center text-sm text-gray-500">No products yet. Add a piece to start building your catalog.</td>
               </tr>
             </tbody>
           </table>
@@ -253,7 +274,7 @@ onMounted(() => {
           </p>
           <div class="flex gap-2">
             <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="cursor-pointer px-3 py-1.5 rounded-lg border bg-white border-gray-300 hover:bg-gray-50 text-sm font-medium text-gray-700 disabled:opacity-50 disabled:hover:bg-white transition-colors">
-              Prev
+              Previous
             </button>
             <button v-for="page in totalPages" :key="page" @click="goToPage(page)" :class="page === currentPage ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'" class="cursor-pointer px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors">
               {{ page }}
@@ -266,7 +287,7 @@ onMounted(() => {
       </div>
 
       <div class="mb-12">
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">Categories Management</h2>
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Categories</h2>
         
         <div class="max-w-3xl overflow-x-auto bg-white rounded-xl shadow-sm border border-gray-200">
           <table class="min-w-full divide-y divide-gray-200">

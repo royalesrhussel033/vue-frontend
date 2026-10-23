@@ -4,19 +4,29 @@ import router from '@/router'
 import FeaturedProduct from '@/components/featuredProduct.vue'
 
 
-
+const getErrorMessages = (error, fallback) => {
+    const validationMessages = Object.values(error.response?.data?.errors ?? {}).flat()
+    return validationMessages.length
+        ? validationMessages
+        : [error.response?.data?.message || error.response?.data?.error || fallback]
+}
 
 
 export const useProductStore = defineStore('products', {
     state: () => ({
         user: null,
-        errors: null,
+        errors: [],
         loading: false,
         categories: [],
         newCategory: "",
         products: [],
+        shopError: null,
         featuredProducts: [],
+        featuredProductsError: null,
+        featuredProductsLoading: false,
         bestSellerProducts: [],
+        bestSellerProductsError: null,
+        bestSellerProductsLoading: false,
     }),
     actions: {
         async updateproduct(id, formData) {
@@ -33,7 +43,8 @@ export const useProductStore = defineStore('products', {
                 }
                 return response.data
             } catch (error) {
-                this.errors = error.response?.data?.error || []
+                this.errors = getErrorMessages(error, 'We couldn’t update this piece. Please try again.')
+                return null
             } finally {
                 this.loading = false
             }
@@ -48,11 +59,8 @@ export const useProductStore = defineStore('products', {
                 await this.fetchCategories();
                 return response.data
                 } catch (error) {
-                    if (error.response?.data?.errors) {
-                        this.errors = error.response.data.errors
-                    } else {
-                        this.errors = []
-                    }
+                    this.errors = getErrorMessages(error, 'We couldn’t add this category. Please try again.')
+                    return null
                 } finally {
                     this.loading = false
                 }
@@ -68,11 +76,8 @@ export const useProductStore = defineStore('products', {
                 await this.fetchProducts();
                 return response.data
             } catch (error) {
-                if (error.response?.data?.errors) {
-                    this.errors = error.response.data.errors
-                } else {
-                    this.errors = []
-                }
+                this.errors = getErrorMessages(error, 'We couldn’t add this piece. Please try again.')
+                return null
             } finally {
                 this.loading = false
             }
@@ -114,20 +119,27 @@ export const useProductStore = defineStore('products', {
         },
 
         async fetchUserProducts() {
+            this.featuredProductsError = null
+            this.featuredProductsLoading = true
             try {
                 const response = await api.get('/Guest/getProducts')
                 this.featuredProducts = response.data
             } catch (error) {
+                this.featuredProductsError = error.response?.data?.message || 'We couldn’t load new arrivals. Please try again.'
                 console.error('Error fetching featured Products', error)
-            }  
+            } finally {
+                this.featuredProductsLoading = false
+            }
         },
 
         async fetchShopProducts() {
+            this.shopError = null
             try {
                 const response = await api.get('/Guest/getShopProducts')
                 this.products = response.data
             } catch (error) {
-                console.error('Error fetching Shop Products.')
+                this.shopError = error.response?.data?.message || 'We couldn’t load the shop. Please try again.'
+                console.error('Error fetching Shop Products:', error)
             }
         },
 
@@ -141,11 +153,16 @@ export const useProductStore = defineStore('products', {
         },
 
         async fetchBestSeller() {
+            this.bestSellerProductsError = null
+            this.bestSellerProductsLoading = true
             try {
                 const response = await api.get('/Guest/getBestSeller')
                 this.bestSellerProducts = response.data
             } catch (error) {
+                this.bestSellerProductsError = error.response?.data?.message || 'We couldn’t load bestsellers. Please try again.'
                 console.error("Error fetching Best sellers:", error)
+            } finally {
+                this.bestSellerProductsLoading = false
             }
         },
     }

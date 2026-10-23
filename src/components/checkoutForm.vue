@@ -5,6 +5,7 @@ import { useCheckoutStore } from '@/stores/checkout';
 import { computed, ref } from 'vue';
 import Swal from 'sweetalert2'
 import { useRouter } from 'vue-router';
+import { CreditCard, LoaderCircle, MapPin } from '@lucide/vue'
  
 const router = useRouter()
 const auth = useAuthStore()
@@ -19,25 +20,15 @@ const deliveryAddress = computed(() => [
   auth.user?.country,
 ].filter(Boolean).join(', '))
  
-/**
- * Generate ONE stable UUID per checkout page visit.
- * If the user clicks "Place Order" 10 times in a row, they all
- * carry this same key — the backend will only process the first one
- * and return the cached result for every subsequent duplicate.
- *
- * A new key is generated on the next page visit (new checkout intent).
- */
 const idempotencyKey = ref(crypto.randomUUID())
  
 async function handleSubmit() {
-    // Layer 1 guard: bail out immediately if a request is already running.
-    // This covers fast double-clicks before the :disabled binding kicks in.
     if (checkout.loading) return
  
     if (!cart.items.length) {
         await Swal.fire({
-            title: 'Cart is empty',
-            text: 'Please add at least one item before checkout.',
+            title: 'Your bag is empty',
+            text: 'Add a piece to your bag before heading to checkout.',
             icon: 'warning',
             confirmButtonText: 'Okay'
         })
@@ -56,8 +47,8 @@ async function handleSubmit() {
     ]
     if (requiredProfileFields.some(field => !auth.user?.[field]?.trim())) {
         await Swal.fire({
-            title: 'Complete your profile',
-            text: 'Fill in your order details in your profile before ordering items in your cart.',
+            title: 'Add your delivery details',
+            text: 'We need your name, phone number, and full address to send this order.',
             icon: 'info',
             showCancelButton: true,
             confirmButtonText: 'Go to profile',
@@ -80,19 +71,18 @@ async function handleSubmit() {
     }
  
     try {
-        // Pass the stable key — every retry attempt uses the SAME key
         await checkout.placeOrder(payload, idempotencyKey.value)
         await Swal.fire({
-            title: 'Order placed successfully',
-            text: 'Your order has been submitted.',
+            title: 'Order received!',
+            text: 'Your order is confirmed. Follow its progress from My Orders.',
             icon: 'success',
             confirmButtonText: 'Great'
         })
         await router.push({ name: 'myOrders' })
     } catch {
         await Swal.fire({
-            title: 'Checkout failed',
-            text: checkout.errors.join(', ') || 'Something went wrong.',
+            title: 'We couldn’t place your order',
+            text: checkout.errors.join(', ') || 'Please check your connection and try again.',
             icon: 'error',
             confirmButtonText: 'Okay'
         })
@@ -101,25 +91,22 @@ async function handleSubmit() {
 </script>
  
 <template>
-  <div class="min-h-screen bg-gray-50 text-gray-900 font-sans antialiased flex flex-col justify-center py-16 sm:py-24">
+  <div class="flex min-h-screen flex-col justify-center bg-stone-50 py-16 text-gray-900 antialiased sm:py-24">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
       
       <div class="mb-12 pb-5 border-b border-gray-200">
-        <h1 class="text-3xl font-bold tracking-tight text-gray-900 uppercase">Checkout</h1>
-        <p class="text-xs text-gray-400 uppercase tracking-widest mt-2">Confirm your billing data and finalize your purchase</p>
+        <h1 class="text-3xl font-bold tracking-tight text-gray-900">Checkout</h1>
+        <p class="mt-2 text-sm text-gray-500">Check your delivery details before placing your order.</p>
       </div>
  
       <div class="lg:grid lg:grid-cols-12 lg:gap-x-12 lg:items-start">
         
         <div class="lg:col-span-8 space-y-8">
           
-          <section class="bg-white border border-gray-200 p-6 sm:p-8 shadow-sm rounded-sm">
+          <section class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
             <div class="flex items-center gap-3 mb-6">
-              <div class="p-1.5 bg-gray-100 text-gray-800 shrink-0">
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
+              <div class="shrink-0 rounded-lg bg-stone-100 p-2 text-stone-800">
+                <MapPin :size="18" aria-hidden="true" />
               </div>
               <h2 class="text-xs tracking-widest font-bold uppercase text-gray-900">Shipping Address</h2>
             </div>
@@ -144,16 +131,14 @@ async function handleSubmit() {
             </div>
             
             <div v-else class="text-xs tracking-widest uppercase font-medium text-red-600 bg-red-50 p-4 border border-red-200">
-              No user info found. Please log in to complete checkout.
+              We couldn’t find your account details. Sign in to complete checkout.
             </div>
           </section>
  
-          <section class="bg-white border border-gray-200 p-6 sm:p-8 shadow-sm rounded-sm">
+          <section class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
             <div class="flex items-center gap-3 mb-6">
-              <div class="p-1.5 bg-gray-100 text-gray-800 shrink-0">
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                </svg>
+              <div class="shrink-0 rounded-lg bg-stone-100 p-2 text-stone-800">
+                <CreditCard :size="18" aria-hidden="true" />
               </div>
               <h2 class="text-xs tracking-widest font-bold uppercase text-gray-900">Payment Method</h2>
             </div>
@@ -165,22 +150,22 @@ async function handleSubmit() {
                 </div>
                 <span class="text-sm font-semibold uppercase tracking-wider text-gray-900">Cash on Delivery</span>
               </div>
-              <span class="text-[10px] font-medium tracking-widest text-gray-400 uppercase bg-white border border-gray-200 px-2 py-0.5">Default</span>
+              <span class="text-[10px] font-medium tracking-widest text-gray-500 uppercase bg-white border border-gray-200 px-2 py-0.5">Available</span>
             </div>
           </section>
  
         </div>
  
         <aside class="lg:col-span-4 mt-8 lg:mt-0">
-          <div class="bg-white border border-gray-200 p-6 shadow-sm rounded-sm sticky top-8">
+          <div class="sticky top-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
             <h2 class="text-xs tracking-widest font-bold uppercase text-gray-900 mb-4 pb-3 border-b border-gray-100">
               Order Summary
             </h2>
             
             <div class="space-y-3 text-xs uppercase tracking-wider mb-6 text-gray-600">
               <div class="flex justify-between">
-                <span>Items Selection</span>
-                <span class="font-medium text-gray-900 font-mono">{{ cart.items.length }} line item(s)</span>
+                <span>Pieces</span>
+                <span class="font-medium text-gray-900 font-mono">{{ cart.items.length }}</span>
               </div>
               <div class="flex justify-between">
                 <span>Shipping Fee</span>
@@ -188,11 +173,6 @@ async function handleSubmit() {
               </div>
             </div>
  
-            <!--
-              :disabled="checkout.loading"  → HTML disables the button so it can't be clicked
-              disabled:opacity-50           → visual feedback that the button is inactive
-              disabled:cursor-not-allowed   → cursor changes to show it's blocked
-            -->
             <button
               @click="handleSubmit()"
               :disabled="checkout.loading"
@@ -201,18 +181,14 @@ async function handleSubmit() {
                      disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-black cursor-pointer"
             >
               <span v-if="checkout.loading" class="flex items-center justify-center gap-2">
-                <!-- Inline spinner, no extra dependency needed -->
-                <svg class="animate-spin h-3.5 w-3.5" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
-                </svg>
+                <LoaderCircle :size="15" class="animate-spin" aria-hidden="true" />
                 Processing…
               </span>
               <span v-else>Place Order</span>
             </button>
             
             <p class="text-[10px] text-gray-400 text-center mt-3 uppercase tracking-wide leading-normal">
-              By placing this order, you authorize delivery confirmation terms.
+              Pay for your order in cash when it arrives. You can track updates from My Orders.
             </p>
           </div>
         </aside>

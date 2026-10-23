@@ -22,7 +22,7 @@ const submit = async () => {
 
   try {
     const response = await api.post('/Guest/password/reset', form)
-    toast.success(response.data.message)
+    toast.success(response.data.message || 'Your password has been updated. You can now sign in.')
     await router.push({ name: 'home' })
   } catch (error) {
     if (error.response?.data?.errors) {
@@ -40,8 +40,9 @@ const submit = async () => {
 
 <template>
   <section class="flex min-h-[70vh] items-center justify-center bg-gray-50 px-4 py-12">
-    <div class="w-full max-w-md rounded-2xl bg-white p-8 shadow-sm">
-      <h1 class="text-2xl font-semibold text-gray-900">Choose a new password</h1>
+    <div class="w-full max-w-md rounded-2xl border border-stone-200 bg-white p-8 shadow-sm">
+      <p class="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">Account security</p>
+      <h1 class="mt-2 text-2xl font-semibold text-gray-900">Choose a new password</h1>
       <p class="mt-2 text-sm text-gray-600">Your reset link can only be used once and expires after a limited time.</p>
 
       <ul v-if="errors.length" class="mt-5 space-y-1 rounded-lg bg-red-50 p-4 text-sm text-red-700" role="alert">

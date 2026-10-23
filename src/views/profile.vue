@@ -85,8 +85,8 @@ const saveProfile = async () => {
 </script>
 
 <template>
-  <section class="min-h-screen bg-gray-50 px-4 py-12 text-gray-900">
-    <div class="mx-auto max-w-3xl rounded-2xl bg-white p-6 shadow-sm sm:p-10">
+  <section class="min-h-screen bg-stone-50 px-4 py-12 text-gray-900">
+    <div class="mx-auto max-w-3xl rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-10">
       <div class="mb-8 border-b border-gray-100 pb-5">
         <p class="text-xs font-semibold uppercase tracking-widest text-blue-600">Your account</p>
         <h1 class="mt-2 text-3xl font-semibold">Profile</h1>
@@ -114,7 +114,7 @@ const saveProfile = async () => {
           <li v-for="(error, index) in errors" :key="index">{{ error }}</li>
         </ul>
 
-        <section class="rounded-xl border border-gray-200 p-5">
+        <section class="rounded-2xl border border-stone-200 bg-stone-50/70 p-5 sm:p-6">
           <h2 class="text-base font-semibold">Email two-factor authentication</h2>
           <p class="mt-1 text-sm text-gray-600">
             Add a one-time code sent to your verified email address when signing in. Email codes are helpful but are not phishing-resistant.
@@ -211,6 +211,6 @@ const saveProfile = async () => {
 
 .profile-input:focus {
   outline: none;
-  box-shadow: 0 0 0 2px #3b82f6;
+  box-shadow: 0 0 0 2px #57534e;
 }
 </style>

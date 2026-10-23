@@ -3,6 +3,7 @@ import { reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { useProductStore } from '@/stores/products';
 import { useToast } from 'vue-toastification';
+import AdminSidebar from '@/components/adminSidebar.vue'
 
 const toast = useToast()
 const router = useRouter();
@@ -15,19 +16,22 @@ const form = reactive({
 const submitForm = async () => {
     const result = await productStore.addcategory(form);
     if (result) {
-        toast.success('Category Added')
+        toast.success(result.message || 'Category added to your catalog.')
         form.name = ''; // Clears the input field after success
         router.back(); // auto-redirect after adding
+    } else {
+        toast.error(productStore.errors[0] || 'We couldn’t add this category. Please try again.')
     }
 };
 </script>
 
 <template>
-    <div class="max-w-2xl mx-auto mt-8 bg-white border border-gray-200 rounded-xl shadow-sm p-6 lg:p-8">
+    <AdminSidebar>
+    <div class="mx-4 my-6 max-w-2xl rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:mx-auto sm:my-8 lg:p-8">
         
         <div class="mb-8 border-b border-gray-100 pb-4">
-            <h1 class="text-2xl font-bold text-gray-900">Add New Category</h1>
-            <p class="text-sm text-gray-500 mt-1">Create a new product category to keep your store organized.</p>
+            <h1 class="text-2xl font-bold text-gray-900">Add a category</h1>
+            <p class="mt-1 text-sm text-gray-500">Create a category shoppers can use to discover related finds.</p>
         </div>
 
         <form @submit.prevent="submitForm">
@@ -53,11 +57,12 @@ const submitForm = async () => {
                 </button>
                 <button 
                     type="submit" 
-                    class="cursor-pointer text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5"
+                    class="cursor-pointer rounded-lg bg-black px-5 py-2.5 text-sm font-medium text-white transition hover:bg-stone-800"
                 >
                     Add Category
                 </button>
             </div>
         </form>
     </div>
+    </AdminSidebar>
 </template>

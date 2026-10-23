@@ -21,10 +21,10 @@ async function submitConcern() {
   try {
     const response = await api.post('/Guest/Concern', form.value)
     await Swal.fire({
-      title: 'Sent',
-      text: response.data.message || 'Your message has been sent successfully.',
+      title: 'Message sent',
+      text: response.data.message || 'Thanks for getting in touch. Our team will get back to you soon.',
       icon: 'success',
-      confirmButtomText: 'Okay'
+      confirmButtonText: 'Okay'
     })
 
     form.value = {
@@ -37,8 +37,8 @@ async function submitConcern() {
       errors.value = error.response.data.errors || {}
     } else {
       await Swal.fire({
-        title: 'Error',
-        text: 'Something went wrong. Please try again.',
+        title: 'We couldn’t send your message',
+        text: 'Please check your connection and try again in a moment.',
         icon: 'error',
         confirmButtonText: 'Okay'
       })
@@ -51,15 +51,15 @@ async function submitConcern() {
 </script>
 
 <template>
-  <section class="bg-white py-16 px-4 sm:px-6 lg:px-8 min-h-screen flex items-center justify-center">
-    <div class="max-w-lg w-full space-y-8">
+  <section class="flex min-h-screen items-center justify-center bg-stone-50 px-4 py-16 sm:px-6 lg:px-8">
+    <div class="w-full max-w-xl space-y-8 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-10">
       
       <div class="text-center">
         <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">
           Contact Us
         </h2>
         <p class="mt-4 text-sm text-gray-600">
-          Have a question about your order or our collections? Send us a message and our support team will get back to you shortly.
+          Have a question about an order or a piece you spotted? Send us a note and our team will be happy to help.
         </p>
       </div>
 
@@ -108,7 +108,7 @@ async function submitConcern() {
 
           <div>
             <label for="concern" class="block text-sm font-medium text-gray-700">
-              Your Concern
+              How can we help?
             </label>
             <div class="mt-1">
               <textarea 

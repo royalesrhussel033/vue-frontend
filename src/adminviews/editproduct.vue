@@ -5,6 +5,7 @@ import { storeToRefs } from 'pinia'
 import { useProductStore } from '@/stores/products'
 import { useToast } from 'vue-toastification'
 import { api } from '@/lib/api'
+import AdminSidebar from '@/components/adminSidebar.vue'
 
 const toast = useToast()
 const route = useRoute()
@@ -68,17 +69,20 @@ const submitUpdate = async () => {
 
     const result = await productStore.updateproduct(route.params.id, formData)
     if (result) {
-        toast.success('Product updated')
+        toast.success(result.message || 'Piece details updated.')
         router.back()
+    } else {
+        toast.error(productStore.errors[0] || 'We couldn’t update this piece. Please try again.')
     }
 }
 </script>
 
 <template>
-    <div class="max-w-4xl mx-auto mt-8 bg-white border border-gray-200 rounded-xl shadow-sm p-6 lg:p-8">
+    <AdminSidebar>
+    <div class="mx-4 my-6 max-w-4xl rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:mx-auto sm:my-8 lg:p-8">
         <div class="mb-8 border-b border-gray-100 pb-4">
-            <h1 class="text-2xl font-bold text-gray-900">Update Product</h1>
-            <p class="text-sm text-gray-500 mt-1">Update the details and inventory for this item.</p>
+            <h1 class="text-2xl font-bold text-gray-900">Edit product</h1>
+            <p class="mt-1 text-sm text-gray-500">Refresh the description, sizing, price, or available quantity.</p>
         </div>
 
         <form @submit.prevent="submitUpdate">
@@ -96,12 +100,12 @@ const submitUpdate = async () => {
 
                 <div>
                     <label for="price" class="block mb-2 text-sm font-medium text-gray-900">Price</label>
-                    <input v-model="form.price" type="number" id="price" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
+                    <input v-model="form.price" type="number" id="price" min="0" step="0.01" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-black focus:border-black block w-full p-2.5" required />
                 </div>
 
                 <div>
-                    <label for="stock" class="block mb-2 text-sm font-medium text-gray-900">Stock Available</label>
-                    <input v-model="form.stock" type="number" id="stock" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
+                    <label for="stock" class="block mb-2 text-sm font-medium text-gray-900">Quantity available</label>
+                    <input v-model="form.stock" type="number" id="stock" min="0" step="1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-black focus:border-black block w-full p-2.5" required />
                 </div>
 
                 <div>
@@ -115,7 +119,7 @@ const submitUpdate = async () => {
                 </div>
 
                 <div class="md:col-span-2">
-                    <label class="block mb-2 text-sm font-medium text-gray-900">Available Sizes</label>
+                    <label class="block mb-2 text-sm font-medium text-gray-900">Sizes available</label>
                     <div class="flex gap-2 flex-wrap">
                         <label v-for="size in sizesList" :key="size.id" class="inline-flex items-center gap-2 px-3 py-2 border rounded cursor-pointer">
                             <input type="checkbox" :value="size.id" v-model="selectedSizes" class="h-4 w-4" />
@@ -125,7 +129,7 @@ const submitUpdate = async () => {
                 </div>
 
                 <div>
-                    <label for="image" class="block mb-2 text-sm font-medium text-gray-900">Product Image</label>
+                    <label for="image" class="block mb-2 text-sm font-medium text-gray-900">Piece photos</label>
                     <input @change="handleFileChange" type="file" id="image" class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none file:mr-4 file:py-2.5 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
                 </div>
             </div>
@@ -134,10 +138,11 @@ const submitUpdate = async () => {
                 <button type="button" @click="router.back()" class="cursor-pointer text-gray-700 bg-white border border-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 hover:bg-gray-100">
                     Cancel
                 </button>
-                <button type="submit" class="cursor-pointer text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg text-sm px-5 py-2.5">
+                <button type="submit" class="cursor-pointer rounded-lg bg-black px-5 py-2.5 text-sm font-medium text-white transition hover:bg-stone-800">
                     Update Product
                 </button>
             </div>
         </form>
     </div>
+    </AdminSidebar>
 </template>

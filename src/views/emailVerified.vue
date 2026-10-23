@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { RouterLink, useRoute } from 'vue-router'
 import { api } from '@/lib/api'
 
 const route = useRoute()
@@ -41,9 +41,14 @@ onMounted(async () => {
       <p v-if="verifying" class="mt-3 text-sm leading-6 text-gray-600">
         Please wait while we verify your email address.
       </p>
-      <p v-else-if="verified" class="mt-3 text-sm leading-6 text-gray-600">
-        Your email address is verified. Close this page and return to the login page to proceed.
-      </p>
+      <div v-else-if="verified" class="mt-3">
+        <p class="text-sm leading-6 text-gray-600">
+          Your email is verified. You’re all set to sign in and keep exploring.
+        </p>
+        <RouterLink :to="{ name: 'home' }" class="mt-6 inline-flex rounded-lg bg-black px-5 py-3 text-sm font-medium text-white transition hover:bg-stone-800">
+          Back to the shop
+        </RouterLink>
+      </div>
       <p v-else class="mt-3 text-sm leading-6 text-red-700" role="alert">
         {{ errorMessage }}
       </p>

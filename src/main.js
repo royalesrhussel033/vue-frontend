@@ -1,5 +1,3 @@
-import './assets/main.css'
-import { useAuthStore } from './stores/auth'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import Toast from 'vue-toastification'
@@ -13,11 +11,8 @@ import router from './router'
 
 createApp(App).use(router).use(createPinia()).use(Toast, {
     position: 'top-right',
-    timeout: 3000,
+    timeout: 4000,
     closeOnClick: true,
+    pauseOnFocusLoss: true,
+    pauseOnHover: true,
 }).mount('#app');
-
-
-
-const authStore = useAuthStore()
-authStore.init()

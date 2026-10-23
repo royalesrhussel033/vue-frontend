@@ -11,8 +11,8 @@ const getStatusColor = (status) => {
   const colors = {
     'pending': 'bg-yellow-100 text-yellow-800',
     'processing': 'bg-blue-100 text-blue-800',
-    'delivering': 'bg-purple-100 text-purple-800',
-    'completed': 'bg-green-100 text-green-800',
+    'shipped': 'bg-stone-100 text-stone-800',
+    'delivered': 'bg-emerald-100 text-emerald-800',
     'cancelled': 'bg-red-100 text-red-800'
   };
   return colors[status.toLowerCase()] || 'bg-gray-100 text-gray-800';
@@ -20,8 +20,8 @@ const getStatusColor = (status) => {
 </script>
 
 <template>
-  <div class="bg-white rounded-lg shadow mt-8">
-    <div class="p-6 border-b border-gray-200">
+  <div class="mt-8 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
+    <div class="border-b border-gray-200 p-6">
       <h2 class="text-lg font-semibold text-gray-900">Recent Orders</h2>
     </div>
 
@@ -36,7 +36,7 @@ const getStatusColor = (status) => {
             <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Status</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody v-if="orders?.length">
           <tr v-for="order in orders" :key="order.id" class="border-t border-gray-200 hover:bg-gray-50">
             <td class="px-6 py-4 text-sm text-gray-900">#{{ order.id }}</td>
             <td class="px-6 py-4 text-sm text-gray-900">{{ order.customer_name }}</td>
@@ -48,6 +48,13 @@ const getStatusColor = (status) => {
               </span>
             </td>
             
+          </tr>
+        </tbody>
+        <tbody v-else>
+          <tr>
+            <td colspan="5" class="px-6 py-10 text-center text-sm text-gray-500">
+              No recent orders yet. New orders will appear here.
+            </td>
           </tr>
         </tbody>
       </table>

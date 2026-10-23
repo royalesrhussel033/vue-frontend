@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { RouterLink } from 'vue-router';
+import { CircleCheck, Package } from '@lucide/vue'
 
 const props = defineProps({ items: Array });
 
@@ -16,7 +16,7 @@ const criticalItems = computed(() =>
 const filteredItems = computed(() => {
   let items = showCritical.value ? criticalItems.value : props.items;
   
-  return items?.sort((a, b) => {
+  return items?.slice().sort((a, b) => {
     if (sortBy.value === 'stock') return a.stock - b.stock;
     if (sortBy.value === 'name') return a.name.localeCompare(b.name);
     return 0;
@@ -30,40 +30,36 @@ const getStockStatus = (stock) => {
   return { text: 'OK', color: 'text-green-600', bg: 'bg-green-100' };
 };
 
-async function restockProduct(productId) {
-  // Handle restock action
-  console.log('Restock product:', productId);
-}
 </script>
 
 <template>
-  <div class="bg-white rounded-lg shadow">
+  <div class="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
     <!-- Header -->
-    <div class="p-6 border-b border-gray-200">
+    <div class="border-b border-gray-200 p-6">
       <div class="flex items-center justify-between">
         <div>
-          <h2 class="text-lg font-semibold text-gray-900">📦 Stock Alerts</h2>
-          <p class="text-sm text-gray-500">{{ criticalItems.length }} critical items</p>
+          <h2 class="flex items-center gap-2 text-lg font-semibold text-gray-900"><Package :size="19" /> Stock alerts</h2>
+          <p class="text-sm text-gray-500">{{ criticalItems.length }} items with fewer than 5 in stock</p>
         </div>
       </div>
     </div>
 
     <!-- Controls -->
-    <div class="p-4 bg-gray-50 border-b border-gray-200 flex gap-4">
+    <div class="flex flex-wrap gap-3 border-b border-gray-200 bg-gray-50 p-4">
       <button
         @click="showCritical = !showCritical"
         :class="`px-4 py-2 rounded text-sm font-medium transition ${
           showCritical 
-            ? 'bg-red-600 text-white' 
+            ? 'bg-black text-white'
             : 'bg-white text-gray-700 border border-gray-300'
         }`"
       >
-        Show Critical Only ({{ criticalItems.length }})
+        {{ showCritical ? 'Show all stock' : 'Show critical only' }} ({{ criticalItems.length }})
       </button>
 
       <select
         v-model="sortBy"
-        class="px-3 py-2 border border-gray-300 rounded text-sm"
+        class="rounded-lg border border-gray-300 px-3 py-2 text-sm"
       >
         <option value="stock">Sort by Stock Level</option>
         <option value="name">Sort by Name</option>
@@ -71,12 +67,12 @@ async function restockProduct(productId) {
     </div>
 
     <!-- Content -->
-    <div class="p-6">
+    <div class="p-5 sm:p-6">
       <div v-if="filteredItems?.length" class="space-y-3">
         <div
           v-for="item in filteredItems"
           :key="item.id"
-          class="p-4 border-l-4 rounded flex items-center justify-between"
+          class="flex items-center justify-between rounded-xl border-l-4 p-4"
           :class="getStockStatus(item.stock).bg"
         >
           <!-- Left: Item Info -->
@@ -99,28 +95,23 @@ async function restockProduct(productId) {
             </p>
           </div>
 
-          <!-- Right: Actions -->
-          <!-- <div class="flex gap-2">
-            <RouterLink
-              :to="`/admin/products/${item.id}`"
-              class="px-3 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition"
-            >
-              View
-            </RouterLink>
-            <button
-              @click="restockProduct(item.id)"
-              class="px-3 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 transition"
-            >
-              + Restock
-            </button>
-          </div> -->
         </div>
       </div>
 
       <!-- Empty State -->
-      <div v-else class="text-center py-8">
-        <p class="text-green-600 font-semibold text-lg">✓ All products in stock!</p>
-        <p class="text-gray-500 text-sm">No low stock alerts at the moment</p>
+      <div v-else-if="!items?.length" class="py-8 text-center">
+        <p class="font-semibold text-gray-900">No products to monitor yet</p>
+        <p class="text-sm text-gray-500">Inventory will appear here as products are added.</p>
+      </div>
+      <div v-else-if="showCritical" class="py-8 text-center">
+        <CircleCheck class="mx-auto mb-2 text-emerald-700" :size="24" aria-hidden="true" />
+        <p class="font-semibold text-gray-900">No critical stock alerts</p>
+        <p class="text-sm text-gray-500">No items currently have fewer than five in stock.</p>
+      </div>
+      <div v-else class="py-8 text-center">
+        <CircleCheck class="mx-auto mb-2 text-emerald-700" :size="24" aria-hidden="true" />
+        <p class="font-semibold text-gray-900">Inventory looks good</p>
+        <p class="text-sm text-gray-500">There are no low-stock alerts right now.</p>
       </div>
     </div>
   </div>

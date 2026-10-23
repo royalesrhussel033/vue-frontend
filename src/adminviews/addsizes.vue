@@ -3,6 +3,7 @@ import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
 import { api } from '@/lib/api'
+import AdminSidebar from '@/components/adminSidebar.vue'
 
 const toast = useToast()
 const router = useRouter()
@@ -14,24 +15,25 @@ const form = reactive({
 const submitForm = async () => {
   try {
     await api.post('/Admin/storeAdminSizes', { name: form.name })
-    toast.success('Size added successfully')
+    toast.success('Size option added.')
     router.back()
   } catch (error) {
     const message =
       error.response?.data?.errors?.name?.[0] ||
       error.response?.data?.message ||
-      'Unable to add size'
+      'We couldn’t add this size. Please try again.'
     toast.error(message)
   }
 }
 </script>
 
 <template>
-  <div class="max-w-2xl mx-auto mt-8 bg-white border border-gray-200 rounded-xl shadow-sm p-6 lg:p-8">
+  <AdminSidebar>
+  <div class="mx-4 my-6 max-w-2xl rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:mx-auto sm:my-8 lg:p-8">
     <div class="mb-8 border-b border-gray-100 pb-4">
-      <h1 class="text-2xl font-bold text-gray-900">Add New Size</h1>
+      <h1 class="text-2xl font-bold text-gray-900">Add a size option</h1>
       <p class="text-sm text-gray-500 mt-1">
-        Create a new size option to attach to products.
+        Add a size option for the pieces in your catalog.
       </p>
     </div>
 
@@ -60,11 +62,12 @@ const submitForm = async () => {
         </button>
         <button
           type="submit"
-          class="text-white bg-blue-600 hover:bg-blue-700 rounded-lg text-sm px-5 py-2.5"
+          class="rounded-lg bg-black px-5 py-2.5 text-sm font-medium text-white transition hover:bg-stone-800"
         >
           Add Size
         </button>
       </div>
     </form>
   </div>
+  </AdminSidebar>
 </template>

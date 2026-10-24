@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { api } from '@/lib/api'
 import Swal from 'sweetalert2'
+import { LoaderCircle } from '@lucide/vue'
 
 
 
@@ -134,7 +135,7 @@ async function submitConcern() {
             :disabled="loading"
             class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition duration-150 ease-in-out hover:cursor-pointer"
           >
-            
+            <LoaderCircle v-if="loading" :size="16" class="mr-2 animate-spin" aria-hidden="true" />
             {{ loading ? 'Sending...' : 'Send Message' }}
           </button>
         </div>

@@ -2,13 +2,14 @@
 import { computed, nextTick, ref, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from 'vue-toastification'
-import { X } from '@lucide/vue'
+import { LoaderCircle, X } from '@lucide/vue'
 
 const toast = useToast()
 const email = ref('')
 const password = ref('')
 const twoFactorCode = ref('')
 const mode = ref('login')
+const pendingAction = ref('')
 const auth = useAuthStore()
 const twoFactorRequired = computed(() => Boolean(auth.twoFactorChallenge))
 const twoFactorInput = ref(null)
@@ -47,18 +48,33 @@ const handleTwoFactor = async () => {
 }
 
 const resendTwoFactorCode = async () => {
-  const message = await auth.resendTwoFactorCode()
-  if (message) toast.info(message)
+  pendingAction.value = 'two-factor'
+  try {
+    const message = await auth.resendTwoFactorCode()
+    if (message) toast.info(message)
+  } finally {
+    pendingAction.value = ''
+  }
 }
 
 const resendVerification = async () => {
-  const message = await auth.resendVerification(email.value)
-  if (message) toast.info(message)
+  pendingAction.value = 'verification'
+  try {
+    const message = await auth.resendVerification(email.value)
+    if (message) toast.info(message)
+  } finally {
+    pendingAction.value = ''
+  }
 }
 
 const requestPasswordReset = async () => {
-  const message = await auth.requestPasswordReset(email.value)
-  if (message) toast.info(message)
+  pendingAction.value = 'reset'
+  try {
+    const message = await auth.requestPasswordReset(email.value)
+    if (message) toast.info(message)
+  } finally {
+    pendingAction.value = ''
+  }
 }
 </script>
 
@@ -123,6 +139,7 @@ const requestPasswordReset = async () => {
             :disabled="auth.loading"
             class="w-full cursor-pointer rounded-lg bg-black px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-stone-800 disabled:opacity-60"
           >
+            <LoaderCircle v-if="auth.loading" :size="16" class="mr-2 inline animate-spin" aria-hidden="true" />
             {{ auth.loading ? 'Signing in…' : 'Sign in' }}
           </button>
         </div>
@@ -144,9 +161,11 @@ const requestPasswordReset = async () => {
         <div class="px-8">
           <button
             type="submit"
-            class="w-full rounded-lg bg-black px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-stone-800"
+            :disabled="pendingAction === 'reset'"
+            class="w-full rounded-lg bg-black px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Send reset link
+            <LoaderCircle v-if="pendingAction === 'reset'" :size="16" class="mr-2 inline animate-spin" aria-hidden="true" />
+            {{ pendingAction === 'reset' ? 'Sending reset link…' : 'Send reset link' }}
           </button>
         </div>
       </form>
@@ -174,6 +193,7 @@ const requestPasswordReset = async () => {
             :disabled="auth.loading"
             class="w-full rounded-lg bg-black px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-stone-800 disabled:opacity-60"
           >
+            <LoaderCircle v-if="auth.loading" :size="16" class="mr-2 inline animate-spin" aria-hidden="true" />
             {{ auth.loading ? 'Verifying…' : 'Verify and sign in' }}
           </button>
         </div>
@@ -191,10 +211,12 @@ const requestPasswordReset = async () => {
         <button
           v-if="mode === 'login' && !twoFactorRequired"
           type="button"
+          :disabled="pendingAction === 'verification'"
           class="text-blue-600 hover:underline"
           @click="resendVerification"
         >
-          Resend verification email
+          <LoaderCircle v-if="pendingAction === 'verification'" :size="14" class="mr-1 inline animate-spin" aria-hidden="true" />
+          {{ pendingAction === 'verification' ? 'Sending…' : 'Resend verification email' }}
         </button>
         <button
           v-if="mode === 'forgot' && !twoFactorRequired"
@@ -207,10 +229,12 @@ const requestPasswordReset = async () => {
         <button
           v-if="twoFactorRequired"
           type="button"
+          :disabled="pendingAction === 'two-factor'"
           class="text-blue-600 hover:underline"
           @click="resendTwoFactorCode"
         >
-          Resend code
+          <LoaderCircle v-if="pendingAction === 'two-factor'" :size="14" class="mr-1 inline animate-spin" aria-hidden="true" />
+          {{ pendingAction === 'two-factor' ? 'Sending…' : 'Resend code' }}
         </button>
         <button
           v-if="twoFactorRequired"

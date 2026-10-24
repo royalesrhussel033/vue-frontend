@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import { useProductStore } from '@/stores/products';
 import { useToast } from 'vue-toastification';
 import AdminSidebar from '@/components/adminSidebar.vue'
+import { LoaderCircle } from '@lucide/vue'
 
 const toast = useToast()
 const router = useRouter();
@@ -57,9 +58,11 @@ const submitForm = async () => {
                 </button>
                 <button 
                     type="submit" 
-                    class="cursor-pointer rounded-lg bg-black px-5 py-2.5 text-sm font-medium text-white transition hover:bg-stone-800"
+                    :disabled="productStore.loading"
+                    class="cursor-pointer rounded-lg bg-black px-5 py-2.5 text-sm font-medium text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                    Add Category
+                    <LoaderCircle v-if="productStore.loading" :size="15" class="mr-1 inline animate-spin" aria-hidden="true" />
+                    {{ productStore.loading ? 'Adding category…' : 'Add Category' }}
                 </button>
             </div>
         </form>

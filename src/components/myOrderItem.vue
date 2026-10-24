@@ -5,6 +5,7 @@ import ProductDetailsModal from './productDetailsModal.vue';
 import { useProductStore } from '@/stores/products';
 import Swal from 'sweetalert2'
 import { api } from '@/lib/api'
+import { LoaderCircle } from '@lucide/vue'
 
 const { item } = defineProps({
   item: {
@@ -185,6 +186,7 @@ async function cancelOrder() {
             @click="cancelOrder"
             :disabled="isLoading"
             class="font-medium text-red-600 hover:text-red-900 hover:cursor-pointer transition-colors disabled:opacity-50">
+            <LoaderCircle v-if="isLoading" :size="14" class="mr-1 inline animate-spin" aria-hidden="true" />
             {{ isLoading ? 'Cancelling...' : 'Cancel Order' }}
           </button>
           <button
@@ -192,6 +194,7 @@ async function cancelOrder() {
             @click="confirmReceived"
             :disabled="isConfirming"
             class="hover:cursor-pointer font-medium text-gray-700 hover:text-black transition-colors disabled:opacity-50">
+            <LoaderCircle v-if="isConfirming" :size="14" class="mr-1 inline animate-spin" aria-hidden="true" />
             {{ isConfirming ? 'Confirming...' : 'Confirm Received' }}
           </button>
           

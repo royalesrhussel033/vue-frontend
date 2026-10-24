@@ -3,7 +3,7 @@ import { ref, watch, computed } from 'vue'
 import { api } from '@/lib/api'
 import { orderStore } from '@/stores/orders'
 import { useToast } from 'vue-toastification'
-import { Star, X } from '@lucide/vue'
+import { LoaderCircle, Star, X } from '@lucide/vue'
 
 const toast = useToast()
 
@@ -113,6 +113,7 @@ async function submitRating() {
             :disabled="submitting"
             class="px-4 py-2 bg-black text-white rounded-lg text-sm hover:bg-gray-800 disabled:opacity-50 hover:cursor-pointer"
           >
+            <LoaderCircle v-if="submitting" :size="14" class="mr-1 inline animate-spin" aria-hidden="true" />
             {{ submitting ? 'Saving review...' : 'Submit review' }}
           </button>
 

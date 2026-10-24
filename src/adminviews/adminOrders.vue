@@ -5,10 +5,13 @@ import { storeToRefs } from 'pinia';
 import { onMounted, ref } from 'vue';
 import Swal from 'sweetalert2';
 import { useToast } from 'vue-toastification'
+import { LoaderCircle } from '@lucide/vue'
 
 const orders = orderStore()
 const toast = useToast()
 const expandedOrderId = ref(null) // Tracks which order card is expanded
+const updatingOrderId = ref(null)
+const updatingStatus = ref('')
 
 const formatDate = (value) => {
   return new Date(value).toLocaleString('en-PH', {
@@ -46,6 +49,10 @@ const getStatusBadgeClass = (status) => {
 }
 
 const changeOrderStatus = async (orderId, status) => {
+  if (updatingOrderId.value !== null) return
+  updatingOrderId.value = orderId
+  updatingStatus.value = status
+
   try {
     await orders.updateOrderStatus(orderId, status)
     await orders.getAdminOrders()
@@ -61,6 +68,9 @@ const changeOrderStatus = async (orderId, status) => {
       icon: 'error',
       confirmButtonText: 'Okay'
     })
+  } finally {
+    updatingOrderId.value = null
+    updatingStatus.value = ''
   }
 }
 </script>
@@ -179,23 +189,29 @@ const changeOrderStatus = async (orderId, status) => {
                 <button 
                   v-if="item.status === 'Pending'"
                   @click="changeOrderStatus(item.id, 'Processing')" 
-                  class="px-3 py-1.5 bg-white text-xs text-gray-700 font-semibold rounded-lg border border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all cursor-pointer"
+                  :disabled="updatingOrderId === item.id"
+                  class="px-3 py-1.5 bg-white text-xs text-gray-700 font-semibold rounded-lg border border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Mark Processing
+                  <LoaderCircle v-if="updatingStatus === 'Processing' && updatingOrderId === item.id" :size="14" class="mr-1 inline animate-spin" aria-hidden="true" />
+                  {{ updatingStatus === 'Processing' && updatingOrderId === item.id ? 'Updating…' : 'Mark Processing' }}
                 </button>
                 <button 
                   v-if="item.status === 'Processing'"
                   @click="changeOrderStatus(item.id, 'Shipped')" 
-                  class="px-3 py-1.5 bg-white text-xs text-gray-700 font-semibold rounded-lg border border-gray-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition-all cursor-pointer"
+                  :disabled="updatingOrderId === item.id"
+                  class="px-3 py-1.5 bg-white text-xs text-gray-700 font-semibold rounded-lg border border-gray-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition-all cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Mark Shipped
+                  <LoaderCircle v-if="updatingStatus === 'Shipped' && updatingOrderId === item.id" :size="14" class="mr-1 inline animate-spin" aria-hidden="true" />
+                  {{ updatingStatus === 'Shipped' && updatingOrderId === item.id ? 'Updating…' : 'Mark Shipped' }}
                 </button>
                 <button 
                   v-if="item.status === 'Shipped'"
                   @click="changeOrderStatus(item.id, 'Delivered')" 
-                  class="px-3 py-1.5 bg-white text-xs text-gray-700 font-semibold rounded-lg border border-gray-200 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 transition-all cursor-pointer"
+                  :disabled="updatingOrderId === item.id"
+                  class="px-3 py-1.5 bg-white text-xs text-gray-700 font-semibold rounded-lg border border-gray-200 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 transition-all cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Mark Delivered
+                  <LoaderCircle v-if="updatingStatus === 'Delivered' && updatingOrderId === item.id" :size="14" class="mr-1 inline animate-spin" aria-hidden="true" />
+                  {{ updatingStatus === 'Delivered' && updatingOrderId === item.id ? 'Updating…' : 'Mark Delivered' }}
                 </button>
               </div>
             </div>

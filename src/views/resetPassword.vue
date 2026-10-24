@@ -3,6 +3,7 @@ import { reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
 import { api } from '@/lib/api'
+import { LoaderCircle } from '@lucide/vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -63,6 +64,7 @@ const submit = async () => {
           <input id="confirm-new-password" v-model="form.password_confirmation" type="password" required minlength="9" autocomplete="new-password" class="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
         <button type="submit" :disabled="loading || !form.token" class="w-full rounded-lg bg-black px-4 py-3 text-sm font-semibold text-white hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60">
+          <LoaderCircle v-if="loading" :size="16" class="mr-2 inline animate-spin" aria-hidden="true" />
           {{ loading ? 'Updating…' : 'Update password' }}
         </button>
         <p v-if="!form.token" class="text-sm text-red-600">This reset link is incomplete. Request a new link from sign in.</p>

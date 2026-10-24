@@ -2,7 +2,7 @@
 import { reactive, ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from 'vue-toastification'
-import { X } from '@lucide/vue'
+import { LoaderCircle, X } from '@lucide/vue'
 
 const toast = useToast()
 const auth = useAuthStore()
@@ -119,6 +119,7 @@ const submitForm = async () => {
           :disabled="auth.loading"
           class="w-full rounded-lg bg-black px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-60"
         >
+          <LoaderCircle v-if="auth.loading" :size="16" class="mr-2 inline animate-spin" aria-hidden="true" />
           {{ auth.loading ? 'Creating account…' : 'Create account' }}
         </button>
       </form>

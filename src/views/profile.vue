@@ -3,6 +3,7 @@ import { onMounted, reactive, ref } from 'vue'
 import { api } from '@/lib/api'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from 'vue-toastification'
+import { LoaderCircle } from '@lucide/vue'
 
 const auth = useAuthStore()
 const toast = useToast()
@@ -144,6 +145,7 @@ const saveProfile = async () => {
               class="rounded-lg border border-gray-300 px-4 py-3 text-sm font-semibold transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
               @click="updateTwoFactor"
             >
+              <LoaderCircle v-if="twoFactorSaving" :size="15" class="mr-1 inline animate-spin" aria-hidden="true" />
               {{ twoFactorSaving ? 'Updating…' : twoFactorEnabled ? 'Disable 2FA' : 'Enable 2FA' }}
             </button>
           </div>
@@ -193,6 +195,7 @@ const saveProfile = async () => {
           :disabled="saving"
           class="rounded-lg bg-black px-6 py-3 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
         >
+          <LoaderCircle v-if="saving" :size="16" class="mr-2 inline animate-spin" aria-hidden="true" />
           {{ saving ? 'Saving…' : 'Save profile' }}
         </button>
       </form>

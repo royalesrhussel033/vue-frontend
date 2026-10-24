@@ -1,18 +1,23 @@
 <script setup>
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
 import { api } from '@/lib/api'
 import AdminSidebar from '@/components/adminSidebar.vue'
+import { LoaderCircle } from '@lucide/vue'
 
 const toast = useToast()
 const router = useRouter()
+const loading = ref(false)
 
 const form = reactive({
   name: ''
 })
 
 const submitForm = async () => {
+  if (loading.value) return
+  loading.value = true
+
   try {
     await api.post('/Admin/storeAdminSizes', { name: form.name })
     toast.success('Size option added.')
@@ -23,6 +28,8 @@ const submitForm = async () => {
       error.response?.data?.message ||
       'We couldn’t add this size. Please try again.'
     toast.error(message)
+  } finally {
+    loading.value = false
   }
 }
 </script>
@@ -62,9 +69,11 @@ const submitForm = async () => {
         </button>
         <button
           type="submit"
-          class="rounded-lg bg-black px-5 py-2.5 text-sm font-medium text-white transition hover:bg-stone-800"
+          :disabled="loading"
+          class="rounded-lg bg-black px-5 py-2.5 text-sm font-medium text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          Add Size
+          <LoaderCircle v-if="loading" :size="15" class="mr-1 inline animate-spin" aria-hidden="true" />
+          {{ loading ? 'Adding size…' : 'Add Size' }}
         </button>
       </div>
     </form>
